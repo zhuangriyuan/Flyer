@@ -2,7 +2,7 @@ name: Update Flyer Prices
 
 on:
   schedule:
-    - cron: "0 13 * * *"   # 每天 UTC 13:00 跑一次（约北美东部早上8-9点），可以自己改
+    - cron: "0 6 * * 5"   # UTC 6:00 周五 = 多伦多夏令时(EDT)周五凌晨2am；冬令时(EST)期间会提前到凌晨1am
   workflow_dispatch:        # 允许在网页上手动点按钮触发
 
 jobs:
