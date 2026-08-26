@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多伦多超市特价 · Flyer 搜索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Noto+Sans+SC:wght@400;600;800&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #16302A;
+    --bg-soft: #1D3C33;
+    --card: #FBF3E3;
+    --card-line: #E3D7BB;
+    --ink: #1F2B24;
+    --ink-soft: #5B6B60;
+    --cream: #F5EFE0;
+    --green: #4A7862;
+    --green-bright: #7FBE9A;
+    --red: #E1483C;
+    --gold: #F2B705;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(242,183,5,0.08), transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(225,72,60,0.08), transparent 35%);
+    font-family:'Inter','Noto Sans SC',sans-serif;
+    color:var(--cream);
+  }
+  h1,h2,h3,.display{
+    font-family:'Archivo Black','Noto Sans SC',sans-serif;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    padding:48px 24px 28px;
+    text-align:center;
+    border-bottom:1px dashed rgba(245,239,224,0.25);
+  }
+  .eyebrow{
+    font-family:'Roboto Mono',monospace;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--green-bright);
+    margin-bottom:14px;
+  }
+  header h1{
+    font-size:clamp(28px,5vw,46px);
+    line-height:1.15;
+    margin:0 0 10px;
+  }
+  header h1 span{color:var(--gold);}
+  header p{
+    color:var(--card-line);
+    font-size:15px;
+    max-width:520px;
+    margin:0 auto;
+  }
+
+  /* ---------- Search ---------- */
+  .search-wrap{
+    max-width:720px;
+    margin:32px auto 0;
+    padding:0 24px;
+  }
+  .search-box{
+    position:relative;
+    background:var(--card);
+    border-radius:14px;
+    box-shadow:0 14px 0 rgba(0,0,0,0.18);
+    padding:6px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .search-box input{
+    flex:1;
+    border:none;
+    background:transparent;
+    outline:none;
+    font-family:'Noto Sans SC','Inter',sans-serif;
+    font-size:18px;
+    font-weight:600;
+    color:var(--ink);
+    padding:14px 12px;
+  }
+  .search-box input::placeholder{color:var(--ink-soft); font-weight:500;}
+  .search-box button{
+    background:var(--red);
+    color:#fff;
+    border:none;
+    border-radius:9px;
+    padding:14px 22px;
+    font-weight:700;
+    font-family:'Noto Sans SC',sans-serif;
+    cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .search-box button:hover{transform:translateY(-2px);}
+  .quick-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-top:16px;
+  }
+  .quick-tags button{
+    background:transparent;
+    border:1px solid rgba(245,239,224,0.35);
+    color:var(--cream);
+    border-radius:999px;
+    padding:6px 16px;
+    font-size:13px;
+    font-family:'Noto Sans SC',sans-serif;
+    cursor:pointer;
+  }
+  .quick-tags button:hover{border-color:var(--gold); color:var(--gold);}
+
+  /* ---------- Store filters ---------- */
+  .stores{
+    max-width:960px;
+    margin:28px auto 0;
+    padding:0 24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+  }
+  .store-chip{
+    border:1.5px solid var(--chip-color,var(--green));
+    color:var(--chip-color,var(--green-bright));
+    background:rgba(255,255,255,0.03);
+    border-radius:8px;
+    padding:6px 12px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Noto Sans SC',sans-serif;
+    transition:all .12s ease;
+  }
+  .store-chip.active{
+    background:var(--chip-color,var(--green));
+    color:var(--bg);
+  }
+  .stores-header{
+    max-width:960px;
+    margin:20px auto 0;
+    padding:0 24px;
+    display:flex;
+    gap:8px;
+    justify-content:center;
+  }
+  .select-all-btn{
+    background:transparent;
+    border:1px solid var(--gold);
+    color:var(--gold);
+    border-radius:999px;
+    padding:5px 14px;
+    font-size:12px;
+    font-weight:600;
+    font-family:'Noto Sans SC',sans-serif;
+    cursor:pointer;
+  }
+  .select-all-btn:hover{
+    background:var(--gold);
+    color:var(--bg);
+  }
+
+  /* ---------- Results ---------- */
+  main{max-width:1100px; margin:0 auto; padding:36px 24px 80px;}
+  .results-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:18px;
+    font-size:13px;
+    color:var(--card-line);
+    font-family:'Roboto Mono',monospace;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:20px;
+  }
+  .card{
+    position:relative;
+    background:var(--card);
+    color:var(--ink);
+    border-radius:4px;
+    padding:18px 16px 16px;
+    clip-path: polygon(
+      0% 4px, 4px 0%, calc(100% - 4px) 0%, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px)
+    );
+    border:1px solid var(--card-line);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:14px; left:-7px;
+    width:14px; height:14px;
+    background:var(--bg);
+    border-radius:50%;
+    box-shadow: inset 0 0 0 1px var(--card-line);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .store-badge{
+    font-family:'Roboto Mono',monospace;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    padding:3px 8px;
+    border-radius:5px;
+    color:#fff;
+    background:var(--badge-color,var(--green));
+  }
+  .discount-stamp{
+    font-family:'Archivo Black',sans-serif;
+    font-size:12px;
+    color:var(--red);
+    border:2px solid var(--red);
+    border-radius:50%;
+    width:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    line-height:1.05;
+    transform:rotate(-8deg);
+    flex-shrink:0;
+  }
+  .item-name{
+    font-size:17px;
+    font-weight:700;
+    font-family:'Noto Sans SC',sans-serif;
+    margin:0;
+  }
+  .item-name-en{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:-6px;
+  }
+  .price-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-top:auto;
+  }
+  .price{
+    font-family:'Roboto Mono',monospace;
+    font-size:26px;
+    font-weight:700;
+    color:var(--red);
+  }
+  .unit{font-size:12px; color:var(--ink-soft);}
+  .orig-price{
+    font-family:'Roboto Mono',monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    text-decoration:line-through;
+  }
+  .card.clickable{cursor:pointer; transition:transform .12s ease;}
+  .card.clickable:hover{transform:translateY(-3px);}
+  .valid{
+    font-size:11px;
+    color:var(--ink-soft);
+    font-family:'Roboto Mono',monospace;
+    border-top:1px dashed var(--card-line);
+    padding-top:8px;
+  }
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--card-line);
+  }
+  .empty .display{font-size:22px; color:var(--gold); margin-bottom:8px;}
+
+  footer{
+    text-align:center;
+    padding:24px;
+    font-size:12px;
+    color:var(--card-line);
+    border-top:1px dashed rgba(245,239,224,0.2);
+  }
+  footer a{color:var(--gold);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Toronto Grocery Flyers</div>
+  <h1>一次搜索，比遍<span>多伦多</span>超市特价</h1>
+  <p>Loblaws · No Frills · Longo's · Food Basics · 大统华 T&amp;T · Metro · Galleria</p>
+</header>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <input id="searchInput" type="text" placeholder="搜索：肉 / 菜 / 牛奶 / 鸡蛋 / 海鲜…" autocomplete="off">
+    <button id="searchBtn">搜索</button>
+  </div>
+  <div class="quick-tags" id="quickTags"></div>
+</div>
+
+<div class="stores-header">
+  <button id="selectAllBtn" class="select-all-btn">全选</button>
+  <button id="deselectAllBtn" class="select-all-btn">取消全选</button>
+</div>
+<div class="stores" id="storeFilters"></div>
+
+<main>
+  <div class="results-meta">
+    <span id="resultCount">显示全部特价</span>
+    <span id="updatedAt"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  数据来自各超市传单自动抓取，更新频率取决于抓取任务运行的频率 · 项目开源于
+  <a href="#" id="repoLink">GitHub</a>
+</footer>
+
+<script>
+// 内嵌兜底数据：当 fetch('data.json') 因 file:// 本地打开被浏览器拦截，
+// 或 data.json 缺失/加载失败时，自动使用这份数据，保证页面始终可用。
+// 部署到 GitHub Pages（https）后会优先使用外部 data.json，方便你直接改那个文件更新内容。
+const FALLBACK_DATA = {"updated": "2026-08-21", "stores": [{"id": "loblaws", "name": "Loblaws", "nameZh": "Loblaws", "color": "#F2B705"}, {"id": "nofrills", "name": "No Frills", "nameZh": "No Frills", "color": "#E1483C"}, {"id": "longos", "name": "Longo's", "nameZh": "Longo's", "color": "#4A7862"}, {"id": "foodbasics", "name": "Food Basics", "nameZh": "Food Basics", "color": "#C9812E"}, {"id": "tnt", "name": "T&T", "nameZh": "大统华", "color": "#B4231F"}, {"id": "metro", "name": "Metro", "nameZh": "Metro", "color": "#E1483C"}, {"id": "galleria", "name": "Galleria", "nameZh": "家乐", "color": "#8C4A2F"}], "items": [{"store": "tnt", "category": "肉", "nameZh": "去骨鸡腿肉", "nameEn": "Boneless Chicken Thighs", "price": 3.99, "originalPrice": 6.99, "unit": "/lb", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "tnt", "category": "肉", "nameZh": "五花肉", "nameEn": "Pork Belly", "price": 4.49, "originalPrice": 6.99, "unit": "/lb", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "loblaws", "category": "肉", "nameZh": "牛肉碎", "nameEn": "Ground Beef Extra Lean", "price": 5.99, "originalPrice": 8.49, "unit": "/lb", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "nofrills", "category": "肉", "nameZh": "整鸡", "nameEn": "Whole Chicken", "price": 1.99, "originalPrice": 3.49, "unit": "/lb", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "metro", "category": "肉", "nameZh": "猪排骨", "nameEn": "Pork Back Ribs", "price": 4.99, "originalPrice": 7.99, "unit": "/lb", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "foodbasics", "category": "肉", "nameZh": "鸡胸肉", "nameEn": "Chicken Breast", "price": 3.49, "originalPrice": 5.99, "unit": "/lb", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "galleria", "category": "肉", "nameZh": "排骨", "nameEn": "Pork Spare Ribs", "price": 4.29, "originalPrice": 6.49, "unit": "/lb", "validFrom": "2026-08-19", "validTo": "2026-08-25"}, {"store": "longos", "category": "肉", "nameZh": "鸡翅", "nameEn": "Chicken Wings", "price": 4.99, "originalPrice": 7.49, "unit": "/lb", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "tnt", "category": "菜", "nameZh": "小白菜", "nameEn": "Bok Choy", "price": 0.99, "originalPrice": 1.79, "unit": "/lb", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "galleria", "category": "菜", "nameZh": "娃娃菜", "nameEn": "Napa Cabbage", "price": 0.79, "originalPrice": 1.49, "unit": "/lb", "validFrom": "2026-08-19", "validTo": "2026-08-25"}, {"store": "loblaws", "category": "菜", "nameZh": "西兰花", "nameEn": "Broccoli", "price": 1.99, "originalPrice": 2.99, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "nofrills", "category": "菜", "nameZh": "胡萝卜袋装", "nameEn": "Carrots 2lb Bag", "price": 1.49, "originalPrice": 2.49, "unit": "/bag", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "metro", "category": "菜", "nameZh": "生菜", "nameEn": "Romaine Lettuce", "price": 1.49, "originalPrice": 2.49, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "foodbasics", "category": "菜", "nameZh": "青椒", "nameEn": "Green Peppers", "price": 0.99, "originalPrice": 1.79, "unit": "/lb", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "loblaws", "category": "牛奶", "nameZh": "牛奶 4L", "nameEn": "Milk 4L", "price": 4.99, "originalPrice": 6.29, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "nofrills", "category": "牛奶", "nameZh": "牛奶 2L", "nameEn": "Milk 2L", "price": 2.99, "originalPrice": 3.79, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "metro", "category": "牛奶", "nameZh": "牛奶 4L", "nameEn": "Milk 4L", "price": 5.29, "originalPrice": 6.49, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "tnt", "category": "牛奶", "nameZh": "豆奶 1L", "nameEn": "Soy Milk 1L", "price": 1.99, "originalPrice": 2.99, "unit": "each", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "loblaws", "category": "鸡蛋", "nameZh": "鸡蛋 一打", "nameEn": "Eggs Dozen", "price": 3.49, "originalPrice": 4.99, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "nofrills", "category": "鸡蛋", "nameZh": "鸡蛋 一打", "nameEn": "Eggs Dozen", "price": 2.99, "originalPrice": 4.49, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "foodbasics", "category": "鸡蛋", "nameZh": "鸡蛋 18只装", "nameEn": "Eggs 18ct", "price": 4.99, "originalPrice": 6.99, "unit": "each", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "tnt", "category": "鸡蛋", "nameZh": "鸡蛋 一打", "nameEn": "Eggs Dozen", "price": 3.29, "originalPrice": 4.29, "unit": "each", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "tnt", "category": "海鲜", "nameZh": "活虾", "nameEn": "Live Shrimp", "price": 8.99, "originalPrice": 12.99, "unit": "/lb", "validFrom": "2026-08-20", "validTo": "2026-08-26"}, {"store": "longos", "category": "海鲜", "nameZh": "三文鱼", "nameEn": "Salmon Fillet", "price": 9.99, "originalPrice": 14.99, "unit": "/lb", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "loblaws", "category": "水果", "nameZh": "草莓", "nameEn": "Strawberries", "price": 2.99, "originalPrice": 4.99, "unit": "each", "validFrom": "2026-08-21", "validTo": "2026-08-27"}, {"store": "tnt", "category": "水果", "nameZh": "西瓜", "nameEn": "Watermelon", "price": 0.39, "originalPrice": 0.69, "unit": "/lb", "validFrom": "2026-08-20", "validTo": "2026-08-26"}]};
+
+let DATA = { stores: [], items: [] };
+let activeStores = new Set();
+let currentQuery = "";
+
+async function loadData(){
+  try{
+    const res = await fetch('data.json', { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    DATA = await res.json();
+    console.log('[flyer] 已从 data.json 加载数据');
+  }catch(e){
+    console.warn('[flyer] fetch data.json 失败（本地直接打开 html 会触发此情况），改用内嵌兜底数据：', e.message);
+    DATA = FALLBACK_DATA;
+  }
+  if(!DATA.items || DATA.items.length === 0){
+    console.warn('[flyer] 数据为空，改用内嵌兜底数据');
+    DATA = FALLBACK_DATA;
+  }
+  DATA.stores.forEach(s => activeStores.add(s.id));
+  buildStoreFilters();
+  buildQuickTags();
+  document.getElementById('updatedAt').textContent = DATA.updated ? ('更新于 ' + DATA.updated) : '';
+  render();
+}
+
+function buildStoreFilters(){
+  const wrap = document.getElementById('storeFilters');
+  wrap.innerHTML = '';
+  DATA.stores.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'store-chip active';
+    btn.style.setProperty('--chip-color', s.color);
+    btn.textContent = s.nameZh === s.name ? s.name : (s.nameZh + ' ' + s.name);
+    btn.dataset.id = s.id;
+    btn.addEventListener('click', () => {
+      if(activeStores.has(s.id)){
+        activeStores.delete(s.id);
+        btn.classList.remove('active');
+      } else {
+        activeStores.add(s.id);
+        btn.classList.add('active');
+      }
+      render();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function buildQuickTags(){
+  const cats = [...new Set(DATA.items.map(i => i.category))];
+  const wrap = document.getElementById('quickTags');
+  wrap.innerHTML = '';
+  cats.forEach(c => {
+    const btn = document.createElement('button');
+    btn.textContent = c;
+    btn.addEventListener('click', () => {
+      document.getElementById('searchInput').value = c;
+      currentQuery = c;
+      render();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function storeMeta(id){
+  return DATA.stores.find(s => s.id === id) || { name:id, nameZh:id, color:'#4A7862' };
+}
+
+function matches(item, q){
+  if(!q) return true;
+  const hay = (item.category + ' ' + item.nameZh + ' ' + item.nameEn).toLowerCase();
+  return hay.includes(q.toLowerCase());
+}
+
+function render(){
+  const grid = document.getElementById('grid');
+  const q = currentQuery.trim();
+  const filtered = DATA.items.filter(i => activeStores.has(i.store) && matches(i, q));
+
+  document.getElementById('resultCount').textContent = q
+    ? `“${q}” 共找到 ${filtered.length} 个特价`
+    : `显示全部特价（${filtered.length}）`;
+
+  grid.innerHTML = '';
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+      <div class="display">没有找到相关特价</div>
+      <div>换个关键词试试，比如“肉”“菜”“牛奶”</div>
+    </div>`;
+    return;
+  }
+
+  filtered
+    .sort((a,b)=> (b.originalPrice-b.price)/b.originalPrice - (a.originalPrice-a.price)/a.originalPrice)
+    .forEach(item => {
+      const s = storeMeta(item.store);
+      const pct = Math.round((1 - item.price/item.originalPrice) * 100);
+      const card = document.createElement('div');
+      card.className = 'card';
+      if(item.url){
+        card.classList.add('clickable');
+        card.addEventListener('click', () => window.open(item.url, '_blank', 'noopener'));
+      }
+      card.innerHTML = `
+        <div class="card-top">
+          <span class="store-badge" style="--badge-color:${s.color}">${s.nameZh}</span>
+          <div class="discount-stamp">-${pct}%</div>
+        </div>
+        <div>
+          <p class="item-name">${item.nameEn}</p>
+        </div>
+        <div class="price-row">
+          <span class="price">$${item.price.toFixed(2)}</span>
+          <span class="unit">${item.unit}</span>
+          <span class="orig-price">$${item.originalPrice.toFixed(2)}</span>
+        </div>
+        ${item.validFrom && item.validTo ? `<div class="valid">有效期 ${item.validFrom} ~ ${item.validTo}</div>` : ''}
+      `;
+      grid.appendChild(card);
+    });
+}
+
+document.getElementById('searchBtn').addEventListener('click', () => {
+  currentQuery = document.getElementById('searchInput').value;
+  render();
+});
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    currentQuery = e.target.value;
+    render();
+  }
+});
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  currentQuery = e.target.value;
+  render();
+});
+
+document.getElementById('selectAllBtn').addEventListener('click', () => {
+  DATA.stores.forEach(s => activeStores.add(s.id));
+  document.querySelectorAll('.store-chip').forEach(btn => btn.classList.add('active'));
+  render();
+});
+document.getElementById('deselectAllBtn').addEventListener('click', () => {
+  activeStores.clear();
+  document.querySelectorAll('.store-chip').forEach(btn => btn.classList.remove('active'));
+  render();
+});
+
+loadData();
+</script>
+
+</body>
+</html>

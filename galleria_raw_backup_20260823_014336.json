@@ -1,0 +1,686 @@
+[
+  {
+    "barcode": "807176151051",
+    "name": "CJ COOKED WHITE RICE BOWL 210G*12",
+    "current_price": 17.98,
+    "original_price": 27.99,
+    "unit": "BX",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=807176151051&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "210238",
+    "name": "FRESH BEEF PRIME FLAT IRON(GRILLING) 1LB",
+    "current_price": 23.98,
+    "original_price": null,
+    "unit": "LB",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=210238&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "210232",
+    "name": "FRESH PORK BACK RIB 1LB",
+    "current_price": 9.98,
+    "original_price": null,
+    "unit": "LB",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=210232&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "678108520043",
+    "name": "NH PUNGSAN MAT KIMCHI 800G",
+    "current_price": 11.98,
+    "original_price": 13.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=678108520043&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "031146022908",
+    "name": "NONGSHIM SHIN RAMYUN MULTI 120G*4",
+    "current_price": 5.48,
+    "original_price": 6.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=031146022908&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809576731026",
+    "name": "NOODLEY RICE KALGUKSU KIMCHI 88G",
+    "current_price": 2.48,
+    "original_price": 3.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809576731026&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809576731019",
+    "name": "NOODLEY RICE KALGUKSU ANCHOVY 83G",
+    "current_price": 2.48,
+    "original_price": 3.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809576731019&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809576731033",
+    "name": "NOODLEY RICE KALGUKSU BEEF BONE 87G",
+    "current_price": 2.48,
+    "original_price": 3.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809576731033&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801075014938",
+    "name": "SAJO LIGHT TUNA FLAKES IN OIL(SPICY) 100G*4",
+    "current_price": 8.98,
+    "original_price": 10.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801075014938&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801075012606",
+    "name": "SAJO MILD CANNED TUNA EASY PEEL 100G*4",
+    "current_price": 8.98,
+    "original_price": 10.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801075012606&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "990312838500",
+    "name": "KOKIIO STEAMED CHICKEN BREAST(BLACK PEPPER) 110G",
+    "current_price": 5.48,
+    "original_price": 5.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=990312838500&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "081652191186",
+    "name": "ASSI SEASONED SOYBEAN CURD 320G",
+    "current_price": 5.48,
+    "original_price": 7.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=081652191186&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801066701359",
+    "name": "DAERIMSUN SWEED POWDER SHRIMP AND ANCHOVY 50G",
+    "current_price": 2.48,
+    "original_price": 3.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801066701359&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801066701335",
+    "name": "DAERIMSUN VEGETABLE SEASONED SEAWEED 50G",
+    "current_price": 2.48,
+    "original_price": 3.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801066701335&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809158051436",
+    "name": "KITCHENART FRYING SQUARE PAN 27CM",
+    "current_price": 24.98,
+    "original_price": 29.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809158051436&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809475265738",
+    "name": "DAILY LAB NATURE WET TISSUE",
+    "current_price": 1.48,
+    "original_price": 1.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809475265738&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809172924402",
+    "name": "CODI TOILET PAPER DECO 3PLY",
+    "current_price": 22.98,
+    "original_price": 28.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809172924402&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809630091790",
+    "name": "PATCH HOLIC HIBISCUS COLLAGEN PORE SERUM 30G",
+    "current_price": 12.98,
+    "original_price": 17.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809630091790&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809630091806",
+    "name": "PATCH HOLIC YUJA VITAMIN C BRIGHTENING SERUM 30G",
+    "current_price": 12.98,
+    "original_price": 17.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809630091806&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809630091813",
+    "name": "PATCH HOLIC SUPER BERRY MULTI VITAMIN SERUM 30G",
+    "current_price": 12.98,
+    "original_price": 17.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809630091813&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809630091783",
+    "name": "PATCH HOLIC JERICHO ROSE HYALULONIC ACID SERUM 30G",
+    "current_price": 12.98,
+    "original_price": 17.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809630091783&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657544",
+    "name": "BERRISOM LIP TATOO TINT PACK RED CORE",
+    "current_price": 11.98,
+    "original_price": 13.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657544&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657551",
+    "name": "BERRISOM LIP TATOO TINT PACK COCO ORANGE",
+    "current_price": 11.98,
+    "original_price": 13.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657551&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657568",
+    "name": "BERRISOM LIP TATOO TINT PACK ORCHID PINK",
+    "current_price": 11.98,
+    "original_price": 13.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657568&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657575",
+    "name": "BERRISOM LIP TATOO TINT PACK BERRY PINK",
+    "current_price": 11.98,
+    "original_price": 13.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657575&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657582",
+    "name": "BERRISOM LIP TATOO TINT PACK SCARLET RED",
+    "current_price": 11.98,
+    "original_price": 13.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657582&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657926",
+    "name": "BERRISOM JELLY TATOO TINT APPLE BERRY",
+    "current_price": 9.98,
+    "original_price": 11.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657926&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657933",
+    "name": "BERRISOM JELLY TATOO TINT CHERRY BERRY",
+    "current_price": 9.98,
+    "original_price": 11.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657933&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657940",
+    "name": "BERRISOM JELLY TATOO TINT STRAWBERRY",
+    "current_price": 9.98,
+    "original_price": 11.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657940&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809211657957",
+    "name": "BERRISOM JELLY TATOO TINT RASPBERRY",
+    "current_price": 9.98,
+    "original_price": 11.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809211657957&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175341437",
+    "name": "OTTOGI BEEF BONE FLAVORED SOUP 350ML*10",
+    "current_price": 21.98,
+    "original_price": 29.99,
+    "unit": "BX",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175341437&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801045203317",
+    "name": "OTTOGI BROWN RICE VINEGAR 900ML",
+    "current_price": 6.98,
+    "original_price": 8.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801045203317&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175440543",
+    "name": "OTTOGI SESAME OIL CAN 500ML",
+    "current_price": 19.98,
+    "original_price": 22.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175440543&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801045122106",
+    "name": "OTTOGI DIPPING SAUCE FOR PORK CUTLET BOTTLE 415G",
+    "current_price": 5.48,
+    "original_price": 6.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801045122106&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801045010045",
+    "name": "OTTOGI CURRY MIX SPICY 1KG",
+    "current_price": 14.98,
+    "original_price": 21.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801045010045&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801045010007",
+    "name": "OTTOGI CURRY MIX MILD 1KG",
+    "current_price": 14.98,
+    "original_price": 21.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801045010007&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175010524",
+    "name": "OTTOGI CURRY MIX MEDIUM 1KG",
+    "current_price": 14.98,
+    "original_price": 21.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175010524&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175860501",
+    "name": "OTTOGI BLACK BEAN SAUCE MX 1KG",
+    "current_price": 24.98,
+    "original_price": 29.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175860501&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175480204",
+    "name": "OTTOGI KOREAN VERMICELLI 500G",
+    "current_price": 7.98,
+    "original_price": 9.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175480204&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175480402",
+    "name": "OTTOGI KOREAN VERMICELLI 1KG",
+    "current_price": 10.98,
+    "original_price": 14.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175480402&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801045370118",
+    "name": "OTTOGI WIDE VERMICELLI 400G",
+    "current_price": 6.98,
+    "original_price": 8.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801045370118&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850063502252",
+    "name": "OTTOGI JIN RAMEN SPICY MULTI 120G*4",
+    "current_price": 5.98,
+    "original_price": 8.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850063502252&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850063502238",
+    "name": "OTTOGI JIN RAMEN MILD MULTI 120G*4",
+    "current_price": 5.98,
+    "original_price": 8.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850063502238&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801045522562",
+    "name": "OTTOGI JIN JJAMBBONG RAMEN MULTI 130G*4",
+    "current_price": 10.98,
+    "original_price": 12.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801045522562&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175525196",
+    "name": "OTTOGI SESAME RAMEN MULTI 115G*5",
+    "current_price": 10.98,
+    "original_price": 12.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175525196&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850069667061",
+    "name": "OTTOGI STIR FRY CHEESY RAMEN SPICY CHILI＆CHEDDAR 120G*4",
+    "current_price": 7.98,
+    "original_price": 10.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850069667061&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850069667047",
+    "name": "OTTOGI STIR FRY CHEESY RAMEN CHEDDAR＆MASCARPONE 110G*4",
+    "current_price": 7.98,
+    "original_price": 10.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850069667047&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850069667023",
+    "name": "OTTOGI CHEESY RAMEN SPICY MULTI 111G*4",
+    "current_price": 7.98,
+    "original_price": 10.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850069667023&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850069667009",
+    "name": "OTTOGI CHEESY RAMEN CHEDDAR MULTI 111G*4",
+    "current_price": 7.98,
+    "original_price": 10.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850069667009&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175521440",
+    "name": "OTTOGI JJAJANG INSTANT NOODLE MULTI 135G*5",
+    "current_price": 9.98,
+    "original_price": 10.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175521440&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850069667429",
+    "name": "OTTOGI 3MIN. CURRY SAUCE SPICY 190G",
+    "current_price": 3.98,
+    "original_price": 5.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850069667429&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850069667405",
+    "name": "OTTOGI 3MIN. CURRY SAUCE MILD 190G",
+    "current_price": 3.98,
+    "original_price": 5.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850069667405&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "850069667382",
+    "name": "OTTOGI 3MIN. CURRY SAUCE MEDIUM 190G",
+    "current_price": 3.98,
+    "original_price": 5.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=850069667382&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "645175291305",
+    "name": "OTTOGI 3MIN. BLACK BEAN SAUCE 160G",
+    "current_price": 4.48,
+    "original_price": 5.49,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=645175291305&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "00850063502344",
+    "name": "OTTOGI JIN RAMEN SPICY CUP 65G*6",
+    "current_price": 9.98,
+    "original_price": 13.99,
+    "unit": "BX",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=00850063502344&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "00850063502337",
+    "name": "OTTOGI JIN RAMEN MILD CUP 65G*6",
+    "current_price": 9.98,
+    "original_price": 13.99,
+    "unit": "BX",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=00850063502337&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "7816",
+    "name": "SWEET POTATOES 10LB 10LB",
+    "current_price": 29.98,
+    "original_price": 34.98,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=7816&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "7703",
+    "name": "ONIONS BAG 10LB",
+    "current_price": 9.98,
+    "original_price": 12.98,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=7703&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "033383457826",
+    "name": "YELLOW POTATOES 10LB BAG 10LB",
+    "current_price": 4.98,
+    "original_price": 5.98,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=033383457826&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "5413",
+    "name": "AVOCADO BAG 5EA",
+    "current_price": 3.98,
+    "original_price": 4.98,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=5413&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "280003",
+    "name": "FRESH SALMON SASHIMI FROM CANADA 1LB",
+    "current_price": 34.98,
+    "original_price": null,
+    "unit": "LB",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=280003&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "280060",
+    "name": "Hamachi Sashimi From Japan 1LB",
+    "current_price": 32.98,
+    "original_price": null,
+    "unit": "LB",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=280060&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "068780000214",
+    "name": "FISHERMAN`S FROZEN OYSTER MEAT 227G",
+    "current_price": 6.98,
+    "original_price": 10.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=068780000214&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "280061",
+    "name": "CLEANED SQUID",
+    "current_price": 15.99,
+    "original_price": null,
+    "unit": "LB",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=280061&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "210047",
+    "name": "FRESH PORK COLLAR-BUTT (BBQ) 1LB",
+    "current_price": 8.98,
+    "original_price": null,
+    "unit": "LB",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=210047&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "100001196242",
+    "name": "SPICY BEEF SOUP 700G",
+    "current_price": 10.98,
+    "original_price": 11.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=100001196242&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "260228",
+    "name": "G. PORK HOCK L",
+    "current_price": 14.98,
+    "original_price": 15.99,
+    "unit": "PK",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=260228&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "628902210046",
+    "name": "GALLERIA MAT KIMCHI 1.8KG",
+    "current_price": 17.98,
+    "original_price": 19.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=628902210046&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "628902210053",
+    "name": "GALLERIA MAT KIMCHI (SLICED) 2.7KG",
+    "current_price": 24.98,
+    "original_price": 27.99,
+    "unit": "EA",
+    "is_sale": true,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=628902210053&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "100001196136",
+    "name": "GALLERIA GIMBAP 1PK",
+    "current_price": 4.98,
+    "original_price": null,
+    "unit": "EA",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=100001196136&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809682830019",
+    "name": "100% NFC- JEJU CHEONHYEHYANG MANDARIN JUICE 320ML",
+    "current_price": 3.99,
+    "original_price": null,
+    "unit": "EA",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809682830019&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809682830071",
+    "name": "100% NFC- JEJU GREEN TANGERINE JUICE 320ML",
+    "current_price": 3.99,
+    "original_price": null,
+    "unit": "EA",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809682830071&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8809682830002",
+    "name": "100% NFC - JEJU HALLABONG MANDARIN JUICE 320ML",
+    "current_price": 3.99,
+    "original_price": null,
+    "unit": "EA",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8809682830002&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801117001322",
+    "name": "ORION BICHOBI MATCHA CHOCOLAT FLAVOUR 125G",
+    "current_price": 5.99,
+    "original_price": null,
+    "unit": "EA",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801117001322&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801117001315",
+    "name": "ORION FRESHBERRY PINEAPPLE CAKE FLAVOUR 336G",
+    "current_price": 9.99,
+    "original_price": null,
+    "unit": "EA",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801117001315&BrandNo=002&LangCode=EN"
+  },
+  {
+    "barcode": "8801117001360",
+    "name": "ORION CHOCO PIE MANGO LASSI FLAVOUR 468G",
+    "current_price": 8.99,
+    "original_price": null,
+    "unit": "EA",
+    "is_sale": false,
+    "link": "https://www.galleriasm.com/Category/ProductDetailView?prodBarcode=8801117001360&BrandNo=002&LangCode=EN"
+  }
+]

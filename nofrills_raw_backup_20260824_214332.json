@@ -1,0 +1,482 @@
+[
+  {
+    "productId": "20070132001_EA",
+    "title": "English Cucumber",
+    "brand": null,
+    "price": 0.94,
+    "wasPrice": 1.29,
+    "packageSizing": "1 ea, $0.94/1ea",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/english-cucumber/p/20070132001_EA"
+  },
+  {
+    "productId": "20107500001_EA",
+    "title": "Green Onion",
+    "brand": null,
+    "price": 0.99,
+    "wasPrice": 1.99,
+    "packageSizing": "1 ea, $0.99/1ea",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/green-onion/p/20107500001_EA"
+  },
+  {
+    "productId": "20425893001_KG",
+    "title": "Sweet Green Peppers",
+    "brand": null,
+    "price": 1.08,
+    "wasPrice": 1.61,
+    "packageSizing": "$4.39/1kg $1.99/1lb",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/sweet-green-peppers/p/20425893001_KG"
+  },
+  {
+    "productId": "21121560001_EA",
+    "title": "Broccoli Crown",
+    "brand": null,
+    "price": 1.99,
+    "wasPrice": 2.49,
+    "packageSizing": "1 ea, $1.99/1ea",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/broccoli-crown/p/21121560001_EA"
+  },
+  {
+    "productId": "20111926001_KG",
+    "title": "Plantains, Single",
+    "brand": null,
+    "price": 0.94,
+    "wasPrice": 1.23,
+    "packageSizing": "$2.84/1kg $1.29/1lb",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/plantains-single/p/20111926001_KG"
+  },
+  {
+    "productId": "20772671_EA",
+    "title": "Hickory Smoked Classic Cut Bacon",
+    "brand": "Schneiders",
+    "price": 3.95,
+    "wasPrice": 5.0,
+    "packageSizing": "375 g, $1.05/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/hickory-smoked-classic-cut-bacon/p/20772671_EA"
+  },
+  {
+    "productId": "21241032_EA",
+    "title": "Classic potato chips",
+    "brand": "Lay's",
+    "price": 3.0,
+    "wasPrice": 3.5,
+    "packageSizing": "235 g, $1.28/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/classic-potato-chips/p/21241032_EA"
+  },
+  {
+    "productId": "20766719_EA",
+    "title": "Chocolate Milk",
+    "brand": "Neilson",
+    "price": 1.0,
+    "wasPrice": 1.35,
+    "packageSizing": "750 ml, $0.13/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/chocolate-milk/p/20766719_EA"
+  },
+  {
+    "productId": "21717114_EA",
+    "title": "Pulp-Free 100% Orange Juice",
+    "brand": "President's Choice",
+    "price": 3.75,
+    "wasPrice": 4.49,
+    "packageSizing": "1.36 l, $0.28/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/pulp-free-100-orange-juice/p/21717114_EA"
+  },
+  {
+    "productId": "20121871_EA",
+    "title": "Scented Jasmine Rice",
+    "brand": "Rooster",
+    "price": 13.88,
+    "wasPrice": 19.0,
+    "packageSizing": "8 kg, $0.17/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/scented-jasmine-rice/p/20121871_EA"
+  },
+  {
+    "productId": "20317536001_EA",
+    "title": "Sour Cream, Regular 14%",
+    "brand": "Gay Lea",
+    "price": 2.5,
+    "wasPrice": 3.29,
+    "packageSizing": "500 ml, $0.50/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/sour-cream-regular-14/p/20317536001_EA"
+  },
+  {
+    "productId": "20310546002_C06",
+    "title": "Cola",
+    "brand": "Pepsi",
+    "price": 2.99,
+    "wasPrice": 6.0,
+    "packageSizing": "6x710.0 ml, $0.07/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/cola/p/20310546002_C06"
+  },
+  {
+    "productId": "20159013001_KG",
+    "title": "Long Eggplants",
+    "brand": null,
+    "price": 1.1,
+    "wasPrice": 1.37,
+    "packageSizing": "$4.39/1kg $1.99/1lb",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/long-eggplants/p/20159013001_KG"
+  },
+  {
+    "productId": "20732366_EA",
+    "title": "Original Natural Bacon",
+    "brand": "Maple Leaf",
+    "price": 3.95,
+    "wasPrice": 5.0,
+    "packageSizing": "375 g, $1.05/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/original-natural-bacon/p/20732366_EA"
+  },
+  {
+    "productId": "21030647_EA",
+    "title": "TRISCUIT Original Crackers",
+    "brand": "Christie",
+    "price": 1.88,
+    "wasPrice": null,
+    "packageSizing": "200 g, $1.50/100g",
+    "dealType": "LIMIT",
+    "link": "https://www.nofrills.ca/en/triscuit-original-crackers/p/21030647_EA"
+  },
+  {
+    "productId": "20130270_EA",
+    "title": "2% Microfiltered Milk",
+    "brand": "Neilson",
+    "price": 4.49,
+    "wasPrice": 5.78,
+    "packageSizing": "2 l, $0.22/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/2-microfiltered-milk/p/20130270_EA"
+  },
+  {
+    "productId": "21358407_EA",
+    "title": "OREO, Original Chocolate Sandwich Cookies, Packable, snackable, and forever dunk-able",
+    "brand": "Christie",
+    "price": 2.75,
+    "wasPrice": 3.0,
+    "packageSizing": "270 g, $1.02/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/oreo-original-chocolate-sandwich-cookies-packable/p/21358407_EA"
+  },
+  {
+    "productId": "21283357_EA",
+    "title": "Banana Chocolate Chunk Muffins",
+    "brand": "Farmer's Market",
+    "price": 5.5,
+    "wasPrice": 6.5,
+    "packageSizing": "600 g, $0.92/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/banana-chocolate-chunk-muffins/p/21283357_EA"
+  },
+  {
+    "productId": "21283356_EA",
+    "title": "Blueberry Muffins",
+    "brand": "Farmer's Market",
+    "price": 5.5,
+    "wasPrice": 6.5,
+    "packageSizing": "570 g, $0.96/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/blueberry-muffins/p/21283356_EA"
+  },
+  {
+    "productId": "20601013001_EA",
+    "title": "Red Potatoes, 10 lb Bag",
+    "brand": "Farmer's Market",
+    "price": 4.99,
+    "wasPrice": 6.99,
+    "packageSizing": "4.54 kg, $0.11/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/red-potatoes-10-lb-bag/p/20601013001_EA"
+  },
+  {
+    "productId": "21664492_EA",
+    "title": "Bar.B.Q Potato Chips",
+    "brand": "Lay's",
+    "price": 3.0,
+    "wasPrice": 3.5,
+    "packageSizing": "220 g, $1.36/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/bar-b-q-potato-chips/p/21664492_EA"
+  },
+  {
+    "productId": "21664543_EA",
+    "title": "Sour Cream & Onion Flavoured Potato Chips",
+    "brand": "Lay's",
+    "price": 3.0,
+    "wasPrice": 3.5,
+    "packageSizing": "220 g, $1.36/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/sour-cream-onion-flavoured-potato-chips/p/21664543_EA"
+  },
+  {
+    "productId": "21283358_EA",
+    "title": "Chocolate Chip Muffins",
+    "brand": "Farmer's Market",
+    "price": 5.5,
+    "wasPrice": 6.5,
+    "packageSizing": "600 g, $0.92/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/chocolate-chip-muffins/p/21283358_EA"
+  },
+  {
+    "productId": "21747538_EA",
+    "title": "Vegetable Oil Margarine Original",
+    "brand": "I Can't Believe It's Not Butter!",
+    "price": 1.99,
+    "wasPrice": 3.29,
+    "packageSizing": "400 g, $0.50/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/vegetable-oil-margarine-original/p/21747538_EA"
+  },
+  {
+    "productId": "21664429_EA",
+    "title": "Salt & Vinegar flavoured Potato Chips",
+    "brand": "Lay's",
+    "price": 3.0,
+    "wasPrice": 3.5,
+    "packageSizing": "220 g, $1.36/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/salt-vinegar-flavoured-potato-chips/p/21664429_EA"
+  },
+  {
+    "productId": "21240990_EA",
+    "title": "Wavy Original Potato Chips",
+    "brand": "Lay's",
+    "price": 3.0,
+    "wasPrice": 3.5,
+    "packageSizing": "235 g, $1.28/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/wavy-original-potato-chips/p/21240990_EA"
+  },
+  {
+    "productId": "21241052_EA",
+    "title": "All Dressed Potato Chips",
+    "brand": "Ruffles",
+    "price": 4.29,
+    "wasPrice": 4.79,
+    "packageSizing": "200 g, $2.15/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/all-dressed-potato-chips/p/21241052_EA"
+  },
+  {
+    "productId": "21037796_EA",
+    "title": "Gluten-Free Original Oat Milk Alternative",
+    "brand": "Earth's Own",
+    "price": 3.33,
+    "wasPrice": 4.29,
+    "packageSizing": "1.75 l, $0.19/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/gluten-free-original-oat-milk-alternative/p/21037796_EA"
+  },
+  {
+    "productId": "21664537_EA",
+    "title": "Dill Pickle Flavoured Potato Chips",
+    "brand": "Lay's",
+    "price": 3.0,
+    "wasPrice": 3.5,
+    "packageSizing": "220 g, $1.36/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/dill-pickle-flavoured-potato-chips/p/21664537_EA"
+  },
+  {
+    "productId": "21241146_EA",
+    "title": "Sour Cream 'n Onion Flavoured Potato Chips",
+    "brand": "Ruffles",
+    "price": 4.29,
+    "wasPrice": 4.79,
+    "packageSizing": "200 g, $2.15/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/sour-cream-n-onion-flavoured-potato-chips/p/21241146_EA"
+  },
+  {
+    "productId": "21377841_EA",
+    "title": "Blueberries Cultivated",
+    "brand": "President's Choice",
+    "price": 4.0,
+    "wasPrice": 5.5,
+    "packageSizing": "600 g, $0.67/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/blueberries-cultivated/p/21377841_EA"
+  },
+  {
+    "productId": "21716997_EA",
+    "title": "100% Orange Juice with Pulp",
+    "brand": "President's Choice",
+    "price": 3.75,
+    "wasPrice": 4.49,
+    "packageSizing": "1.36 l, $0.28/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/100-orange-juice-with-pulp/p/21716997_EA"
+  },
+  {
+    "productId": "20298681001_EA",
+    "title": "Original Spread",
+    "brand": "Kraft",
+    "price": 4.99,
+    "wasPrice": 5.79,
+    "packageSizing": "890 ml, $0.56/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/original-spread/p/20298681001_EA"
+  },
+  {
+    "productId": "21486532_EA",
+    "title": "Bleach Club Size",
+    "brand": "No Name",
+    "price": 3.5,
+    "wasPrice": 4.19,
+    "packageSizing": "2.4 l, $0.15/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/bleach-club-size/p/21486532_EA"
+  },
+  {
+    "productId": "21283360_EA",
+    "title": "Carrot Muffins",
+    "brand": "Farmer's Market",
+    "price": 5.5,
+    "wasPrice": 6.5,
+    "packageSizing": "600 g, $0.92/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/carrot-muffins/p/21283360_EA"
+  },
+  {
+    "productId": "21346749_EA",
+    "title": "Marble Cheddar Cheese",
+    "brand": "Armstrong",
+    "price": 4.99,
+    "wasPrice": 6.0,
+    "packageSizing": "400 g, $1.25/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/marble-cheddar-cheese/p/21346749_EA"
+  },
+  {
+    "productId": "20322380001_EA",
+    "title": "Drumstick Vanilla Caramel Cones",
+    "brand": "Nestlé",
+    "price": 4.99,
+    "wasPrice": 5.5,
+    "packageSizing": "4x140.0 ml, $0.89/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/drumstick-vanilla-caramel-cones/p/20322380001_EA"
+  },
+  {
+    "productId": "21283361_EA",
+    "title": "Double Chocolate Muffins",
+    "brand": "Farmer's Market",
+    "price": 5.5,
+    "wasPrice": 6.5,
+    "packageSizing": "570 g, $0.96/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/double-chocolate-muffins/p/21283361_EA"
+  },
+  {
+    "productId": "20305726001_EA",
+    "title": "Red Leaf Lettuce",
+    "brand": null,
+    "price": 1.99,
+    "wasPrice": 3.99,
+    "packageSizing": "1 ea, $1.99/1ea",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/red-leaf-lettuce/p/20305726001_EA"
+  },
+  {
+    "productId": "20312227_EA",
+    "title": "Sliced Strawberries",
+    "brand": "President's Choice",
+    "price": 4.0,
+    "wasPrice": 5.5,
+    "packageSizing": "600 g, $0.67/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/sliced-strawberries/p/20312227_EA"
+  },
+  {
+    "productId": "21241019_EA",
+    "title": "Lightly Salted Potato Chips",
+    "brand": "Lay's",
+    "price": 3.0,
+    "wasPrice": 3.5,
+    "packageSizing": "235 g, $1.28/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/lightly-salted-potato-chips/p/21241019_EA"
+  },
+  {
+    "productId": "21358406_EA",
+    "title": "OREO Double Stuf Sandwich Cookies",
+    "brand": "Christie",
+    "price": 2.75,
+    "wasPrice": 3.0,
+    "packageSizing": "261 g, $1.05/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/oreo-double-stuf-sandwich-cookies/p/21358406_EA"
+  },
+  {
+    "productId": "21540603_EA",
+    "title": "Max Strength and Thickness Paper Towels 3=6 Rolls",
+    "brand": "President's Choice",
+    "price": 7.0,
+    "wasPrice": 8.0,
+    "packageSizing": "3x98.0 ea, $7.00/1ea",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/max-strength-and-thickness-paper-towels-3-6-rolls/p/21540603_EA"
+  },
+  {
+    "productId": "21346757_EA",
+    "title": "Old Cheddar Cheese",
+    "brand": "Armstrong",
+    "price": 4.99,
+    "wasPrice": 6.0,
+    "packageSizing": "400 g, $1.25/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/old-cheddar-cheese/p/21346757_EA"
+  },
+  {
+    "productId": "20310546005_C06",
+    "title": "Zero Sugar Cola",
+    "brand": "Pepsi",
+    "price": 2.99,
+    "wasPrice": 6.0,
+    "packageSizing": "6x710.0 ml, $0.07/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/zero-sugar-cola/p/20310546005_C06"
+  },
+  {
+    "productId": "20312788001_EA",
+    "title": "French Onion Sour Cream Dip",
+    "brand": "Heluva",
+    "price": 4.99,
+    "wasPrice": 8.0,
+    "packageSizing": "680 g, $0.73/100g",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/french-onion-sour-cream-dip/p/20312788001_EA"
+  },
+  {
+    "productId": "20327647_EA",
+    "title": "Original Unsweetened Almond Milk Alternative",
+    "brand": "Earth's Own",
+    "price": 3.33,
+    "wasPrice": 4.29,
+    "packageSizing": "1.89 l, $0.18/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/original-unsweetened-almond-milk-alternative/p/20327647_EA"
+  },
+  {
+    "productId": "20938521_EA",
+    "title": "Zero Ultra",
+    "brand": "Monster Energy",
+    "price": 2.5,
+    "wasPrice": 3.0,
+    "packageSizing": "473 ml, $0.53/100ml",
+    "dealType": "SALE",
+    "link": "https://www.nofrills.ca/en/zero-ultra/p/20938521_EA"
+  }
+]
