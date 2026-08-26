@@ -1,0 +1,21 @@
+{
+  "name": "多伦多超市特价 · Flyer 搜索",
+  "short_name": "Flyer特价",
+  "description": "一次搜索，比遍多伦多超市特价",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#16302A",
+  "theme_color": "#16302A",
+  "icons": [
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
