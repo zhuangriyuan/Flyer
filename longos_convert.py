@@ -26,7 +26,14 @@ item_categories 这个 Google 商品分类树（l1 最粗到 l7 最细），可�
        归"个护美妆"；l1 是 "Home & Garden" 但 l2 不是 "Household Supplies"
        的归"家居百货"（花束、装饰罐子、厨具这类）
     4. 还是没命中，归"其他"，照样收录
+
+⚠️ 商品链接：Flipp 这个接口给 Longo's 的 item_web_url 字段实测全部是 null
+（跟 Walmart 那次不一样，Walmart 这个字段是有值的），没法拿到每个商品单独
+的详情页链接。退一步，没有单独链接的商品统一指向传单页本身
+（LONGOS_FLYER_URL），至少卡片能点开跳过去，而不是完全点不动。
 """
+
+LONGOS_FLYER_URL = "https://www.longos.com/flyers"
 
 import json
 import re
@@ -136,7 +143,7 @@ def convert():
             "unit": parse_unit(item.get("postPriceText")),
             "validFrom": item.get("validFrom"),
             "validTo": item.get("validTo"),
-            "url": item.get("webUrl"),
+            "url": item.get("webUrl") or LONGOS_FLYER_URL,
         })
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

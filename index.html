@@ -135,6 +135,37 @@
   }
   .quick-tags button:hover{border-color:var(--gold); color:var(--gold);}
 
+  /* ---------- Category filters (toggle chips, same pattern as store chips) ---------- */
+  .category-chip{
+    border:1.5px solid var(--gold);
+    color:var(--gold);
+    background:rgba(255,255,255,0.03);
+    border-radius:999px;
+    padding:6px 14px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Noto Sans SC',sans-serif;
+    transition:all .12s ease;
+  }
+  .category-chip.active{
+    background:var(--gold);
+    color:var(--bg);
+  }
+
+  /* ---------- Sort select ---------- */
+  .sort-select{
+    background:var(--bg-soft);
+    color:var(--cream);
+    border:1px solid rgba(245,239,224,0.35);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:12.5px;
+    font-family:'Noto Sans SC',sans-serif;
+    cursor:pointer;
+  }
+  .sort-select:hover{border-color:var(--gold);}
+
   /* ---------- Store filters ---------- */
   .stores{
     max-width:960px;
@@ -326,7 +357,6 @@
     <input id="searchInput" type="text" placeholder="搜索：肉 / 菜 / 牛奶 / 鸡蛋 / 海鲜…" autocomplete="off">
     <button id="searchBtn">搜索</button>
   </div>
-  <div class="quick-tags" id="quickTags"></div>
 </div>
 
 <div class="stores-header">
@@ -335,10 +365,21 @@
 </div>
 <div class="stores" id="storeFilters"></div>
 
+<div class="stores" id="categoryFilters" style="margin-top:10px;"></div>
+
 <main>
   <div class="results-meta">
     <span id="resultCount">显示全部特价</span>
-    <span id="updatedAt"></span>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <select id="sortSelect" class="sort-select">
+        <option value="discount-pct">按折扣力度（默认）</option>
+        <option value="discount-amount">按省的钱最多</option>
+        <option value="price-asc">价格从低到高</option>
+        <option value="price-desc">价格从高到低</option>
+        <option value="name-asc">按名称 A-Z</option>
+      </select>
+      <span id="updatedAt"></span>
+    </div>
   </div>
   <div class="grid" id="grid"></div>
 </main>
@@ -356,7 +397,9 @@ const FALLBACK_DATA = {"updated": "2026-08-21", "stores": [{"id": "loblaws", "na
 
 let DATA = { stores: [], items: [] };
 let activeStores = new Set();
+let activeCategories = new Set();
 let currentQuery = "";
+let currentSort = "discount-pct";
 
 async function loadData(){
   try{
@@ -374,7 +417,7 @@ async function loadData(){
   }
   DATA.stores.forEach(s => activeStores.add(s.id));
   buildStoreFilters();
-  buildQuickTags();
+  buildCategoryFilters();
   document.getElementById('updatedAt').textContent = DATA.updated ? ('更新于 ' + DATA.updated) : '';
   render();
 }
@@ -402,16 +445,27 @@ function buildStoreFilters(){
   });
 }
 
-function buildQuickTags(){
+function buildCategoryFilters(){
+  // 分类是从数据里动态取出来的，新超市带来的新分类（比如"个护美妆"
+  // "家居百货"）会自动出现在这里，不用改代码。
   const cats = [...new Set(DATA.items.map(i => i.category))];
-  const wrap = document.getElementById('quickTags');
+  cats.forEach(c => activeCategories.add(c));  // 默认全部选中，跟现在的体验一致
+
+  const wrap = document.getElementById('categoryFilters');
   wrap.innerHTML = '';
   cats.forEach(c => {
     const btn = document.createElement('button');
+    btn.className = 'category-chip active';
     btn.textContent = c;
+    btn.dataset.category = c;
     btn.addEventListener('click', () => {
-      document.getElementById('searchInput').value = c;
-      currentQuery = c;
+      if(activeCategories.has(c)){
+        activeCategories.delete(c);
+        btn.classList.remove('active');
+      } else {
+        activeCategories.add(c);
+        btn.classList.add('active');
+      }
       render();
     });
     wrap.appendChild(btn);
@@ -428,27 +482,52 @@ function matches(item, q){
   return hay.includes(q.toLowerCase());
 }
 
+// 排序方式跟下拉框的 value 一一对应，新增排序方式的话在这里加一个 case
+// 再在 <select id="sortSelect"> 里加一个 <option> 就行。
+function sortItems(items, sortKey){
+  const sorted = [...items];
+  switch(sortKey){
+    case 'discount-amount':
+      sorted.sort((a,b) => (b.originalPrice-b.price) - (a.originalPrice-a.price));
+      break;
+    case 'price-asc':
+      sorted.sort((a,b) => a.price - b.price);
+      break;
+    case 'price-desc':
+      sorted.sort((a,b) => b.price - a.price);
+      break;
+    case 'name-asc':
+      sorted.sort((a,b) => a.nameEn.localeCompare(b.nameEn));
+      break;
+    case 'discount-pct':
+    default:
+      sorted.sort((a,b)=> (b.originalPrice-b.price)/b.originalPrice - (a.originalPrice-a.price)/a.originalPrice);
+  }
+  return sorted;
+}
+
 function render(){
   const grid = document.getElementById('grid');
   const q = currentQuery.trim();
-  const filtered = DATA.items.filter(i => activeStores.has(i.store) && matches(i, q));
+  const filtered = DATA.items.filter(i =>
+    activeStores.has(i.store) && activeCategories.has(i.category) && matches(i, q)
+  );
+  const sorted = sortItems(filtered, currentSort);
 
   document.getElementById('resultCount').textContent = q
-    ? `“${q}” 共找到 ${filtered.length} 个特价`
-    : `显示全部特价（${filtered.length}）`;
+    ? `“${q}” 共找到 ${sorted.length} 个特价`
+    : `显示全部特价（${sorted.length}）`;
 
   grid.innerHTML = '';
-  if(filtered.length === 0){
+  if(sorted.length === 0){
     grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
       <div class="display">没有找到相关特价</div>
-      <div>换个关键词试试，比如“肉”“菜”“牛奶”</div>
+      <div>换个关键词试试，比如“肉”“菜”“牛奶”，或者检查一下上面的分类/店铺筛选是不是选太少了</div>
     </div>`;
     return;
   }
 
-  filtered
-    .sort((a,b)=> (b.originalPrice-b.price)/b.originalPrice - (a.originalPrice-a.price)/a.originalPrice)
-    .forEach(item => {
+  sorted.forEach(item => {
       const s = storeMeta(item.store);
       const pct = Math.round((1 - item.price/item.originalPrice) * 100);
       const card = document.createElement('div');
@@ -473,7 +552,7 @@ function render(){
         ${item.validFrom && item.validTo ? `<div class="valid">有效期 ${item.validFrom} ~ ${item.validTo}</div>` : ''}
       `;
       grid.appendChild(card);
-    });
+  });
 }
 
 document.getElementById('searchBtn').addEventListener('click', () => {
@@ -488,6 +567,11 @@ document.getElementById('searchInput').addEventListener('keydown', (e) => {
 });
 document.getElementById('searchInput').addEventListener('input', (e) => {
   currentQuery = e.target.value;
+  render();
+});
+
+document.getElementById('sortSelect').addEventListener('change', (e) => {
+  currentSort = e.target.value;
   render();
 });
 
