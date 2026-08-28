@@ -369,7 +369,79 @@
     cursor:pointer; font-size:14px; line-height:1;
     color:var(--red);
   }
-  .compare-item-img{
+  .compare-item-list-check{
+    position:absolute; top:6px; left:6px;
+    width:22px; height:22px;
+    border-radius:50%;
+    border:2px solid var(--card-line);
+    background:rgba(255,255,255,0.9);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:900; color:transparent;
+    z-index:2;
+  }
+  .compare-item-list-check.checked{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:var(--bg);
+  }
+  .compare-modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:20px;
+  }
+  .generate-list-btn{
+    font-family:'Noto Sans SC',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    background:var(--gold);
+    color:var(--bg);
+    border:none;
+    border-radius:8px;
+    padding:10px 20px;
+    cursor:pointer;
+  }
+  .generate-list-btn:hover{filter:brightness(1.08);}
+
+  /* ---------- Shopping list image modal ---------- */
+  .shoplist-modal{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:10px;
+    max-width:560px;
+    width:100%;
+    padding:24px;
+    font-family:'Noto Sans SC',sans-serif;
+    text-align:center;
+  }
+  .shoplist-modal img{
+    max-width:100%;
+    border-radius:6px;
+    border:1px solid var(--card-line);
+    margin:12px 0;
+  }
+  .shoplist-hint{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:8px 0 16px;
+  }
+  .shoplist-modal-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+  }
+  .shoplist-modal-actions a, .shoplist-modal-actions button{
+    font-family:'Noto Sans SC',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    text-decoration:none;
+    border-radius:8px;
+    padding:10px 20px;
+    cursor:pointer;
+    border:none;
+  }
+  .shoplist-download-btn{background:var(--gold); color:var(--bg);}
+  .shoplist-close-btn{background:transparent; border:1px solid var(--card-line) !important; color:var(--ink);}
     width:100%; aspect-ratio:1/1;
     border-radius:5px; overflow:hidden;
     background:var(--cream);
@@ -559,6 +631,24 @@
       <button class="compare-modal-close" id="compareModalCloseBtn">&times;</button>
     </div>
     <div class="compare-grid" id="compareGrid"></div>
+    <div class="compare-modal-actions">
+      <button class="generate-list-btn" id="generateListBtn">生成购物清单图片</button>
+    </div>
+  </div>
+</div>
+
+<div class="compare-modal-overlay" id="shoplistModalOverlay">
+  <div class="shoplist-modal">
+    <div class="compare-modal-header">
+      <h2>购物清单</h2>
+      <button class="compare-modal-close" id="shoplistCloseBtnX">&times;</button>
+    </div>
+    <img id="shoplistImg" alt="购物清单">
+    <p class="shoplist-hint">长按图片选择"保存图片"即可存到手机相册</p>
+    <div class="shoplist-modal-actions">
+      <a class="shoplist-download-btn" id="shoplistDownloadBtn" download="购物清单.png">下载图片</a>
+      <button class="shoplist-close-btn" id="shoplistCloseBtn">关闭</button>
+    </div>
   </div>
 </div>
 
@@ -578,6 +668,10 @@ let currentSort = "discount-pct";
 // 排序出子集，筛出来的还是同一批对象），所以用对象引用当 key 完全够用，
 // 页面重新渲染（比如换排序、切换筛选）也不会丢失已经选中的状态。
 let selectedItems = new Set();
+// 购物清单是"已对比商品"里再单独挑一部分——所以这个 Set 的内容理论上
+// 应该是 selectedItems 的子集，从对比弹窗里移除某个商品的时候要顺手
+// 把它也从这个 Set 里删掉，保持一致。
+let shoppingListItems = new Set();
 
 async function loadData(){
   try{
@@ -811,7 +905,9 @@ function renderCompareModal(){
     const s = storeMeta(item.store);
     const div = document.createElement('div');
     div.className = 'compare-item';
+    const inList = shoppingListItems.has(item);
     div.innerHTML = `
+      <div class="compare-item-list-check ${inList ? 'checked' : ''}" data-list-check title="加入购物清单">&#10003;</div>
       <button class="compare-item-remove" data-remove>&times;</button>
       ${item.image
         ? `<div class="compare-item-img"><img src="${item.image}" alt="" onerror="this.style.display='none'"></div>`
@@ -824,8 +920,19 @@ function renderCompareModal(){
       </div>
       <span class="compare-item-unit">${item.unit}</span>
     `;
+    div.querySelector('[data-list-check]').addEventListener('click', (e) => {
+      const btn = e.currentTarget;
+      if(shoppingListItems.has(item)){
+        shoppingListItems.delete(item);
+        btn.classList.remove('checked');
+      } else {
+        shoppingListItems.add(item);
+        btn.classList.add('checked');
+      }
+    });
     div.querySelector('[data-remove]').addEventListener('click', () => {
       selectedItems.delete(item);
+      shoppingListItems.delete(item);  // 从对比里移除的话，购物清单里也不该留着
       updateCompareBar();
       renderCompareModal();
       render();  // 同步刷新商品列表里对应卡片的选中状态
@@ -845,6 +952,153 @@ function closeCompareModal(){
   document.getElementById('compareModalOverlay').classList.remove('visible');
 }
 
+// ---------- 购物清单图片生成（Canvas 现场画，不依赖任何服务器） ----------
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
+  const chars = text.split('');
+  let line = '';
+  const lines = [];
+  for(const ch of chars){
+    const testLine = line + ch;
+    if(ctx.measureText(testLine).width > maxWidth && line !== ''){
+      lines.push(line);
+      line = ch;
+      if(lines.length >= maxLines) break;
+    } else {
+      line = testLine;
+    }
+  }
+  if(lines.length < maxLines && line) lines.push(line);
+  if(lines.length === maxLines){
+    // 还有内容没显示完，最后一行截断加省略号
+    let last = lines[maxLines-1];
+    while(ctx.measureText(last + '…').width > maxWidth && last.length > 1){
+      last = last.slice(0, -1);
+    }
+    const consumedLen = lines.slice(0, maxLines-1).reduce((n,l)=>n+l.length, 0) + last.length;
+    if(consumedLen < text.length) last += '…';
+    lines[maxLines-1] = last;
+  }
+  lines.forEach((l, i) => ctx.fillText(l, x, y + i*lineHeight));
+  return lines.length;
+}
+
+function generateShoppingListImage(){
+  const items = [...shoppingListItems];
+  if(items.length === 0){
+    alert('先在上面的对比卡片里，点左上角的圆形勾选框，选几个要加入购物清单的商品');
+    return null;
+  }
+
+  const width = 560;
+  const rowHeight = 84;
+  const headerHeight = 84;
+  const footerHeight = 66;
+  const padding = 24;
+  const height = headerHeight + items.length * rowHeight + footerHeight;
+  const scale = 2;  // 画2倍尺寸再压缩显示，图片在手机上看起来更清晰
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+
+  // 背景
+  ctx.fillStyle = '#FBF3E3';
+  ctx.fillRect(0, 0, width, height);
+
+  // 标题
+  ctx.fillStyle = '#1F2B24';
+  ctx.font = 'bold 24px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText('购物清单', padding, 40);
+
+  ctx.font = '12px monospace';
+  ctx.fillStyle = '#5B6B60';
+  const dateStr = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+  ctx.fillText(dateStr, padding, 60);
+
+  ctx.strokeStyle = '#E3D7BB';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padding, headerHeight - 8);
+  ctx.lineTo(width - padding, headerHeight - 8);
+  ctx.stroke();
+
+  let y = headerHeight;
+  let total = 0;
+  items.forEach((item, idx) => {
+    const s = storeMeta(item.store);
+
+    // 左边店铺色条
+    ctx.fillStyle = s.color;
+    ctx.fillRect(padding, y + 12, 5, rowHeight - 26);
+
+    // 店铺名
+    ctx.font = 'bold 11px monospace';
+    ctx.fillStyle = s.color;
+    ctx.fillText(s.nameZh, padding + 14, y + 22);
+
+    // 商品名（最多两行，超出截断加省略号）
+    ctx.fillStyle = '#1F2B24';
+    ctx.font = '15px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+    const maxNameWidth = width - padding*2 - 14 - 90;
+    wrapCanvasText(ctx, item.nameEn, padding + 14, y + 42, maxNameWidth, 19, 2);
+
+    // 价格（右对齐）
+    ctx.fillStyle = '#E1483C';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(`$${item.price.toFixed(2)}`, width - padding, y + 38);
+    ctx.textAlign = 'left';
+
+    total += item.price;
+    y += rowHeight;
+
+    if(idx < items.length - 1){
+      ctx.strokeStyle = '#E3D7BB';
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(width - padding, y);
+      ctx.stroke();
+    }
+  });
+
+  // 合计
+  ctx.strokeStyle = '#1F2B24';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(padding, y + 14);
+  ctx.lineTo(width - padding, y + 14);
+  ctx.stroke();
+
+  ctx.fillStyle = '#1F2B24';
+  ctx.font = 'bold 15px "Noto Sans SC", "Microsoft YaHei", sans-serif';
+  ctx.fillText(`合计（${items.length} 件）`, padding, y + 42);
+
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 24px sans-serif';
+  ctx.fillStyle = '#E1483C';
+  ctx.fillText(`$${total.toFixed(2)}`, width - padding, y + 46);
+  ctx.textAlign = 'left';
+
+  return canvas.toDataURL('image/png');
+}
+
+function openShoppingListModal(){
+  // 等网页字体真的加载完再画，不然 Canvas 画的时候字体可能还没到位，
+  // 用的是浏览器默认字体，中文倒是不受影响，但英文数字字重会不一样。
+  document.fonts.ready.then(() => {
+    const dataUrl = generateShoppingListImage();
+    if(!dataUrl) return;
+    document.getElementById('shoplistImg').src = dataUrl;
+    document.getElementById('shoplistDownloadBtn').href = dataUrl;
+    document.getElementById('shoplistModalOverlay').classList.add('visible');
+  });
+}
+function closeShoppingListModal(){
+  document.getElementById('shoplistModalOverlay').classList.remove('visible');
+}
+
 document.getElementById('compareViewBtn').addEventListener('click', openCompareModal);
 document.getElementById('compareModalCloseBtn').addEventListener('click', closeCompareModal);
 document.getElementById('compareModalOverlay').addEventListener('click', (e) => {
@@ -854,6 +1108,12 @@ document.getElementById('compareClearBtn').addEventListener('click', () => {
   selectedItems.clear();
   updateCompareBar();
   render();
+});
+document.getElementById('generateListBtn').addEventListener('click', openShoppingListModal);
+document.getElementById('shoplistCloseBtn').addEventListener('click', closeShoppingListModal);
+document.getElementById('shoplistCloseBtnX').addEventListener('click', closeShoppingListModal);
+document.getElementById('shoplistModalOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'shoplistModalOverlay') closeShoppingListModal();
 });
 
 loadData();
