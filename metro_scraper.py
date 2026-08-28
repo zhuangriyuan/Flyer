@@ -1,12 +1,9 @@
 """
-Metro.ca Flyer 爬虫 (v3 —— 加上 Cloudflare 防护应对)
+Metro.ca Flyer 爬虫 —— Playwright 版（已验证可用，含无头模式）
 
-依赖：pip install curl_cffi beautifulsoup4
-    （不是 requests！之前那版用 requests 在 GitHub Actions 上被拦了——
-    Metro 现在也上了 Cloudflare 防护（跟同公司的 Food Basics 一样），
-    从抓包能看到 cf_clearance / __cf_bm / forterToken 这些，说明不只是
-    Cloudflare，还叠了 Forter 这个反欺诈服务。curl_cffi 能模拟真实 Chrome
-    的 TLS 握手指纹，这版换成这个。）
+依赖：
+    pip install playwright beautifulsoup4
+    playwright install chromium
 
 用法：
     python metro_scraper.py
@@ -14,33 +11,39 @@ Metro.ca Flyer 爬虫 (v3 —— 加上 Cloudflare 防护应对)
 输出：
     metro_raw.json —— 抓到的原始商品数据
 
-选择器这块沿用上一版（照着真实页面 HTML 结构写的，没有变），改的只是
-"怎么把请求发出去"这一层。
+============================================================
+思路
+============================================================
+Metro 上了 Cloudflare 防护（跟同公司的 Food Basics 一样），之前 curl_cffi
+那版在 GitHub Actions 上会被拦（数据中心 IP，Cloudflare 审得严）。这版改用
+Playwright 打开真实 Chrome，实测能绕过去——包括无头模式（HEADLESS=True）
+也验证过能用，可以直接部署到 GitHub Actions，不用再手动维护 Cookie 了。
+
+翻页是点一个"Load More Deals"按钮触发的，不是无限滚动。踩过的坑，都处理了：
+    1. 页面弹出的 OneTrust Cookie 同意横幅会挡住按钮的点击事件，
+       不关掉的话点了也没反应——先找它的固定按钮 id 关掉。
+    2. 按钮选择器用 data-load-more-ajax-url 这个属性匹配，不用"找文字"
+       （文字匹配容易认错到别的元素）。
+    3. 之前加的 navigator.plugins 伪装（返回假的插件列表数组）会把网站
+       自己的 revealizr.js 特征检测脚本弄崩，级联搞挂后面一串初始化代码，
+       导致按钮的点击事件压根没绑上——真实非无头 Chrome 本来就有真实
+       plugins，不需要这个伪装，已经去掉，只留最基础的 navigator.webdriver
+       这一条。
+    4. 加了网络请求监听，点击后能直接确认有没有真的触发 more-product 请求，
+       不用干等着肉眼判断"是不是卡住了"。
+
+⚠️ 如果哪天这个网站又改版了、又抓不到东西了，把 HEADLESS 改成 False 弹出
+真窗口看看卡在哪一步，是最快的排查方式。
 """
 
 import json
-import os
-import time
-import sys
-import random
 import shutil
+import sys
 from datetime import datetime
 from typing import Optional
 from urllib.parse import urljoin
 
-try:
-    from curl_cffi import requests
-    from curl_cffi.requests.exceptions import RequestException
-    HAS_CURL_CFFI = True
-except ImportError:
-    import requests
-    from requests.exceptions import RequestException
-    HAS_CURL_CFFI = False
-    print(
-        "[metro] ⚠️ 没装 curl_cffi，退回普通 requests 库——大概率会被 Cloudflare 拦下来。\n"
-        "[metro] 强烈建议先执行: pip install curl_cffi\n"
-    )
-
+from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 for _stream in (sys.stdout, sys.stderr):
@@ -48,43 +51,42 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8", errors="replace")
 
 BASE_URL = "https://www.metro.ca/en/online-grocery"
-FLYER_PATH = "/flyer"
-FLYER_FILTER = ":relevance:deal:Flyer & Deals"
+FLYER_URL = (
+    "https://www.metro.ca/en/online-grocery/flyer"
+    "?sortOrder=relevance&filter=%3Arelevance%3Adeal%3AFlyer+%26+Deals"
+)
 
-# "Load More Deals" 按钮背后真正打的接口 —— 从浏览器 Network 面板抓到的，
-# 不是猜的。第1页走普通的 /flyer 页面，第2页起换成这个。
-MORE_PRODUCT_URL = "https://www.metro.ca/en/flyer/more-product"
+HEADLESS = True  # 部署到 GitHub Actions 用 True；本地排查问题想看窗口就改 False
+USE_REAL_CHROME = True
+MAX_CLICKS = 100  # "Load More" 最多点这么多次，安全上限
 
-# ⚠️ 本地测试的时候不带 Cookie 也可能能过（curl_cffi 的 TLS 指纹在家庭网络下
-# 够用），但部署到 GitHub Actions 之后大概率会被 403——Actions 的服务器是
-# 数据中心 IP，Cloudflare 对这类 IP 通常审得更严。
-#
-# Cookie 优先从环境变量 METRO_COOKIE 读（GitHub Actions 用 Secret 注入），
-# 本地手动测试图方便的话，可以把下面这个兜底值直接改成你复制的 Cookie，
-# 但提交到仓库前记得清空，别把 Cookie 提交上去。
-COOKIE_HEADER = os.environ.get("METRO_COOKIE", "")
+_STEALTH_INIT_SCRIPT = """
+Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+window.chrome = window.chrome || { runtime: {} };
+"""
 
-HEADERS = {
-    "accept": "*/*",
-    "accept-language": "en-CA,en;q=0.9",
-    "content-type": "application/json",
-    "priority": "u=1, i",
-    "sec-ch-ua": '"Not=A?Brand";v="99", "Google Chrome";v="124", "Chromium";v="124"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"Windows"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-    "user-agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-    ),
-}
-if COOKIE_HEADER:
-    HEADERS["cookie"] = COOKIE_HEADER
+# 从抓包报错日志里看到真实按钮长这样：
+#   <button data-has-more-product-to-load-init="true" class="cta-secondary
+#   medium load-more-btn" data-load-more-ajax-url="/en/flyer/more-product" ...>
+# 用这个属性选择器比"找文字"准，不会认错到别的元素。
+LOAD_MORE_BUTTON_SELECTOR = "button[data-load-more-ajax-url]"
+LOAD_MORE_TEXT_CANDIDATES = ["Load More Deals", "Load More", "See More", "Show More"]
 
-REQUEST_DELAY_SECONDS = 4.0  # 放慢一点，别让请求节奏太规律、太密集
-MAX_PAGES = 120  # 总共约1586个结果，每页约16个，需要约100页
+# OneTrust 是最常见的 Cookie 同意弹窗服务，几乎所有用它的网站"接受"按钮
+# 的 id 都是这个固定值（OneTrust 自己的标准做法，不是猜的）。这个弹窗会
+# 一直挡在页面上层拦截点击事件，不关掉的话点"加载更多"按钮会一直被拦截。
+ONETRUST_ACCEPT_SELECTOR = "#onetrust-accept-btn-handler"
+
+
+def dismiss_cookie_banner(page) -> None:
+    try:
+        btn = page.locator(ONETRUST_ACCEPT_SELECTOR)
+        if btn.is_visible(timeout=3000):
+            btn.click(timeout=3000)
+            print("[metro] 关掉了 OneTrust Cookie 同意横幅")
+            page.wait_for_timeout(500)
+    except Exception:
+        pass  # 没弹出来这个横幅就算了，不影响后续
 
 
 def parse_before_price_text(tile) -> Optional[str]:
@@ -143,126 +145,121 @@ def parse_tile(tile) -> dict:
     }
 
 
-def make_session():
-    if HAS_CURL_CFFI:
-        return requests.Session(impersonate="chrome124")
-    return requests.Session()
-
-
-def diagnose_403(resp) -> None:
-    print("[metro] ------------------------------------------------------------")
-    print("[metro] 收到 403/被重定向到不相关页面，大概率是：")
-    print("[metro]   1) METRO_COOKIE 是空的/过期了 —— 去浏览器重新抓一份最新的粘进去")
-    print("[metro]   2) 没装 curl_cffi，普通 requests 的 TLS 指纹被识别出来了")
-    print("[metro] 返回内容前300字符，供排查：")
-    try:
-        print("[metro] " + resp.text[:300].replace("\n", " "))
-    except Exception:
-        pass
-    print("[metro] ------------------------------------------------------------")
-
-
-def fetch_page(session, page: int) -> str:
-    """
-    page=1: 普通 flyer 页面（首屏自带的商品）。
-    page>=2: "Load More Deals" 按钮背后的 AJAX 接口，currentPage 从 2 开始递增。
-    这个接口是从浏览器 Network 面板里实测抓到的，不是猜的：
-        GET https://www.metro.ca/en/flyer/more-product
-            ?currentPage=N&sortOrder=relevance&filter=:relevance:deal:Flyer & Deals
-    """
-    if page == 1:
-        url = f"{BASE_URL}{FLYER_PATH}"
-        params = {"sortOrder": "relevance", "filter": FLYER_FILTER}
-    else:
-        url = MORE_PRODUCT_URL
-        params = {"currentPage": page, "sortOrder": "relevance", "filter": FLYER_FILTER}
-
-    request_headers = dict(HEADERS)
-    if page > 1:
-        # 这个接口是给页面内 JS 调用的，很多这类接口会检查这两个头，
-        # 没有的话有可能返回不完整数据或直接拒绝。
-        request_headers["x-requested-with"] = "XMLHttpRequest"
-        request_headers["referer"] = (
-            f"{BASE_URL}{FLYER_PATH}?sortOrder=relevance&filter={FLYER_FILTER}"
-        )
-
-    resp = session.get(url, params=params, headers=request_headers, timeout=20)
-    print(f"[metro] GET {resp.url} -> {resp.status_code}, {len(resp.text)} bytes")
-    if resp.status_code == 403:
-        diagnose_403(resp)
-    resp.raise_for_status()
-    return resp.text
-
-
 def get_all_flyer_items() -> list:
-    session = make_session()
-    print(f"[metro] curl_cffi 可用: {HAS_CURL_CFFI}")
-    if not COOKIE_HEADER:
-        print("[metro] METRO_COOKIE 是空的，先试试光靠 TLS 指纹能不能过（不一定需要 Cookie）")
-
     all_items = []
-    seen_codes_by_page = []
+    seen_codes = set()
 
-    for page in range(1, MAX_PAGES + 1):
-        try:
-            html = fetch_page(session, page)
-        except RequestException as e:
-            print(f"[metro] 第 {page} 页请求失败：{e}，重试一次...")
-            time.sleep(5)
+    with sync_playwright() as p:
+        if USE_REAL_CHROME:
             try:
-                html = fetch_page(session, page)
-            except RequestException as e2:
-                print(f"[metro] 第 {page} 页重试仍失败：{e2}，停止翻页。")
+                browser = p.chromium.launch(headless=HEADLESS, channel="chrome")
+            except Exception as e:
+                print(f"[metro] 用真 Chrome 启动失败：{e}，退回 Playwright 自带 Chromium。")
+                browser = p.chromium.launch(headless=HEADLESS)
+        else:
+            browser = p.chromium.launch(headless=HEADLESS)
+
+        page = browser.new_page(locale="en-CA")
+        page.add_init_script(_STEALTH_INIT_SCRIPT)
+
+        print(f"[metro] 打开页面 {FLYER_URL} ...")
+        try:
+            page.goto(FLYER_URL, wait_until="domcontentloaded", timeout=60000)
+        except Exception as e:
+            print(f"[metro] 页面加载失败/超时：{e}")
+            browser.close()
+            return []
+
+        page.wait_for_timeout(4000)
+        dismiss_cookie_banner(page)
+
+        ajax_fired = {"count": 0}
+
+        def on_response(response):
+            if "more-product" in response.url:
+                ajax_fired["count"] += 1
+
+        page.on("response", on_response)
+
+        def extract_from_current_page():
+            html = page.content()
+            soup = BeautifulSoup(html, "html.parser")
+            tiles = soup.select("div.tile-product[data-product-code]")
+            new_count = 0
+            for t in tiles:
+                item = parse_tile(t)
+                code = item.get("product_code")
+                if code and code not in seen_codes:
+                    seen_codes.add(code)
+                    all_items.append(item)
+                    new_count += 1
+            return len(tiles), new_count
+
+        total_tiles, new_count = extract_from_current_page()
+        print(f"[metro] 首屏解析到 {total_tiles} 个商品卡片（新增 {new_count} 个）")
+
+        if total_tiles == 0:
+            print(
+                "[metro] 首屏就是空的——可能被 Cloudflare 拦了，或者网站结构变了。"
+                "把 HEADLESS 改成 False 弹窗口出来看看是哪种情况。"
+            )
+            browser.close()
+            return all_items
+
+        clicks = 0
+        stable_rounds = 0
+        while clicks < MAX_CLICKS:
+            button = page.locator(LOAD_MORE_BUTTON_SELECTOR).first
+            found_by_attribute = True
+            try:
+                if not button.is_visible(timeout=2000):
+                    found_by_attribute = False
+            except Exception:
+                found_by_attribute = False
+
+            if not found_by_attribute:
+                button = None
+                for text in LOAD_MORE_TEXT_CANDIDATES:
+                    try:
+                        candidate = page.get_by_text(text, exact=False).first
+                        if candidate.is_visible(timeout=1000):
+                            button = candidate
+                            break
+                    except Exception:
+                        continue
+
+            if button is None:
+                print(f"[metro] 第 {clicks} 次点击后找不到\"加载更多\"按钮了，判断已经到底，停止。")
                 break
 
-        soup = BeautifulSoup(html, "html.parser")
-
-        # 只选真正的商品卡片，过滤掉 flyerPromo-a / flyerPromo-b 这种广告横幅
-        tiles = soup.select("div.tile-product[data-product-code]")
-
-        if not tiles:
-            print(f"[metro] 第 {page} 页没有商品卡片，停止翻页。")
-            if page == 1:
-                print(
-                    "[metro] 第一页就是空的 —— 如果上面 GET 打印出来的网址和配置的不一样"
-                    "（比如变成了别的不相关页面），大概率是被 Cloudflare 拦截重定向了，"
-                    "先确认 METRO_COOKIE 是不是过期了；如果网址本身没问题，"
-                    "才是选择器可能不匹配了，需要重新用浏览器 F12 核对。"
-                )
-            break
-
-        if page == 1:
-            total_el = soup.select_one("[data-total-results]")
-            if total_el:
-                total = total_el["data-total-results"]
-                print(f"[metro] 网站显示总共有 {total} 个结果（含非打折商品，实际能抓到的数量以最终结果为准）")
-
-        page_items = [parse_tile(t) for t in tiles]
-        page_codes = [i["product_code"] for i in page_items]
-        seen_codes_by_page.append(page_codes[:3])
-
-        # 翻页有效性检查：如果这页前3个商品编号和上一页完全一样，可能是网站
-        # 偶尔的限流/缓存导致的临时问题，不一定是分页方式真的错了 —— 先等久一点重试一次。
-        if page > 1 and seen_codes_by_page[-1] == seen_codes_by_page[-2]:
-            print(f"[metro] ⚠️ 第 {page} 页内容和第 {page-1} 页前3个商品相同，等10秒后重试一次...")
-            time.sleep(10)
-            html_retry = fetch_page(session, page)
-            soup_retry = BeautifulSoup(html_retry, "html.parser")
-            tiles_retry = soup_retry.select("div.tile-product[data-product-code]")
-            retry_codes = [t.get("data-product-code") for t in tiles_retry[:3]]
-
-            if retry_codes == seen_codes_by_page[-2]:
-                print(f"[metro] 重试后仍然重复，判断真的翻到底了，停止翻页。")
+            before_ajax_count = ajax_fired["count"]
+            try:
+                button.scroll_into_view_if_needed(timeout=5000)
+                page.wait_for_timeout(300)
+                button.click(timeout=5000, force=True)
+                clicks += 1
+            except Exception as e:
+                print(f"[metro] 点击按钮失败：{e}，停止。")
                 break
+
+            page.wait_for_timeout(4000)
+
+            if ajax_fired["count"] == before_ajax_count:
+                print(f"[metro] ⚠️ 第 {clicks} 次点击后没侦测到 more-product 请求，"
+                      f"再试一轮看看是不是偶发的。")
+
+            total_tiles, new_count = extract_from_current_page()
+            print(f"[metro] 第 {clicks} 次点击后，页面共 {total_tiles} 个卡片（本轮新增 {new_count} 个）")
+
+            if new_count == 0:
+                stable_rounds += 1
+                if stable_rounds >= 3:
+                    print("[metro] 连续几次点击都没有新商品，判断到底了，停止。")
+                    break
             else:
-                print(f"[metro] 重试后内容不一样了，继续正常翻页。")
-                page_items = [parse_tile(t) for t in tiles_retry]
-                seen_codes_by_page[-1] = retry_codes
+                stable_rounds = 0
 
-        print(f"[metro] 第 {page} 页解析到 {len(page_items)} 个商品卡片")
-        all_items.extend(page_items)
-
-        time.sleep(REQUEST_DELAY_SECONDS + random.uniform(0, 2.0))  # 加点随机抖动
+        browser.close()
 
     return all_items
 
@@ -283,10 +280,9 @@ if __name__ == "__main__":
         json.dump(items, f, ensure_ascii=False, indent=2)
     print("\n[metro] 已保存全部到 metro_raw.json（打折与非打折都在里面，后续再筛）")
 
-    # 自动备份一份带时间戳的副本，防止误删主文件后又要重新爬一次
     backup_name = f"metro_raw_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     shutil.copy("metro_raw.json", backup_name)
-    print(f"[metro] 已自动备份一份到 {backup_name}（这份千万别手滑删了）")
+    print(f"[metro] 已自动备份一份到 {backup_name}")
 
     if not items:
         sys.exit(1)

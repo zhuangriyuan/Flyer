@@ -559,19 +559,6 @@
     "image": "https://product-images.metro.ca/images/h9d/h91/14247486521374.jpg"
   },
   {
-    "sku": "059072050925",
-    "name": "Whole Wheat Tortillas",
-    "brand": "Selection",
-    "categoryEn": "Bread & Bakery Products",
-    "merchandiseCategory": "Flat bread RTE",
-    "isWeighted": false,
-    "price": 1.99,
-    "originalPrice": 2.49,
-    "unit": "each",
-    "link": "https://www.foodbasics.ca/aisles/bread-bakery-products/tortillas-flat-breads/tortillas/whole-wheat-tortillas/p/059072050925",
-    "image": "https://product-images.metro.ca/images/ha6/h88/16087215636510.jpg"
-  },
-  {
     "sku": "060410087183",
     "name": "Creamy Dill Pickle Flavoured Potato Chips",
     "brand": "Ruffles",
@@ -583,6 +570,19 @@
     "unit": "each",
     "link": "https://www.foodbasics.ca/aisles/snacks/salty-snacks/chips/creamy-dill-pickle-flavoured-potato-chips/p/060410087183",
     "image": "https://product-images.metro.ca/images/h71/h1c/16674565881886.jpg"
+  },
+  {
+    "sku": "059072050925",
+    "name": "Whole Wheat Tortillas",
+    "brand": "Selection",
+    "categoryEn": "Bread & Bakery Products",
+    "merchandiseCategory": "Flat bread RTE",
+    "isWeighted": false,
+    "price": 1.99,
+    "originalPrice": 2.49,
+    "unit": "each",
+    "link": "https://www.foodbasics.ca/aisles/bread-bakery-products/tortillas-flat-breads/tortillas/whole-wheat-tortillas/p/059072050925",
+    "image": "https://product-images.metro.ca/images/ha6/h88/16087215636510.jpg"
   },
   {
     "sku": "059072054848",
@@ -650,19 +650,6 @@
     "image": "https://product-images.metro.ca/images/h4c/h6a/16213943549982.jpg"
   },
   {
-    "sku": "810057291647",
-    "name": "Classic Flavoured Plant-Based Sausages",
-    "brand": "Beyond Breakfast Sausage",
-    "categoryEn": "Frozen",
-    "merchandiseCategory": "Frozen vegetable protein",
-    "isWeighted": false,
-    "price": 7.99,
-    "originalPrice": 10.49,
-    "unit": "each",
-    "link": "https://www.foodbasics.ca/aisles/frozen/meals-sides/vegetarian-meals/classic-flavoured-plant-based-sausages/p/810057291647",
-    "image": "https://product-images.metro.ca/images/h59/h6a/16448879886366.jpg"
-  },
-  {
     "sku": "063100484033",
     "name": "Original Wieners",
     "brand": "Schneiders",
@@ -674,5 +661,18 @@
     "unit": "each",
     "link": "https://www.foodbasics.ca/aisles/meat-poultry/sausages-bacon/sausages-hot-dogs/original-wieners/p/063100484033",
     "image": "https://product-images.metro.ca/images/h8c/h2f/16400023617566.jpg"
+  },
+  {
+    "sku": "810057291647",
+    "name": "Classic Flavoured Plant-Based Sausages",
+    "brand": "Beyond Breakfast Sausage",
+    "categoryEn": "Frozen",
+    "merchandiseCategory": "Frozen vegetable protein",
+    "isWeighted": false,
+    "price": 7.99,
+    "originalPrice": 10.49,
+    "unit": "each",
+    "link": "https://www.foodbasics.ca/aisles/frozen/meals-sides/vegetarian-meals/classic-flavoured-plant-based-sausages/p/810057291647",
+    "image": "https://product-images.metro.ca/images/h59/h6a/16448879886366.jpg"
   }
 ]
