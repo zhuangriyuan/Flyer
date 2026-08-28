@@ -1,9 +1,10 @@
 """
-Food Basics (foodbasics.ca) 本周特价 爬虫 —— Playwright 版（已验证可用，含无头模式）
+Food Basics (foodbasics.ca) 本周特价 爬虫
 
-依赖：
-    pip install playwright beautifulsoup4
-    playwright install chromium
+依赖：pip install curl_cffi beautifulsoup4
+    （不是 requests！这个网站挂在 Cloudflare 机器人防护后面（能看到
+    cf_clearance 这个 cookie），跟 T&T 的 Akamai 是同一类问题——curl_cffi
+    能模拟出真实 Chrome 的 TLS 握手指纹，普通 requests 大概率会被拦。）
 
 用法：
     python foodbasics_scraper.py
@@ -11,32 +12,30 @@ Food Basics (foodbasics.ca) 本周特价 爬虫 —— Playwright 版（已验�
 输出：
     foodbasics_raw.json —— 抓到的原始商品数据
 
-============================================================
-思路
-============================================================
-跟 Metro（同公司旗下）是同一个电商平台，同样上了 Cloudflare 防护，之前
-curl_cffi 那版在 GitHub Actions 上会被拦。这版改用 Playwright 打开真实
-Chrome，实测能绕过去——包括无头模式（HEADLESS=True）也验证过能用，可以
-直接部署到 GitHub Actions，不用再手动维护 Cookie 了。
+这家跟 Metro 是同一个电商平台（Metro Inc 旗下牌子，图片链接都是
+product-images.metro.ca），接口是"点击'加载更多'时前端调的局部刷新接口"，
+直接返回一段 HTML 片段（不是 JSON），每页塞满了 default-product-tile 这种
+卡片，用 currentPage 翻页：
+    GET https://www.foodbasics.ca/flyer/more-product
+        ?currentPage=N&sortOrder=relevance&filter=:relevance:deal:Flyer+%26+Deals
 
-跟 Metro 那版踩过一样的坑，都处理了：
-    1. OneTrust Cookie 同意横幅挡住点击事件，先关掉。
-    2. 按钮选择器优先用 data-load-more-ajax-url 这个属性匹配，找不到再退回
-       文字匹配，找不到按钮的话最后退一步试试滚动触发。
-    3. 不用 navigator.plugins/languages 这类伪装——之前发现这类伪装会把
-       网站自己的特征检测脚本弄崩，级联搞挂初始化代码，导致按钮点击事件
-       压根没绑上。真实非无头 Chrome 本来就不需要这些伪装。
-    4. 加了网络请求监听，点击/滚动后能直接确认有没有真的触发 more-product
-       请求。
+比 Metro 那版好处理的地方：每个商品卡片外层 div 上直接带了一堆 data-*
+属性（data-product-code、data-product-name-en、data-product-brand、
+data-merchandise-category……），不用从零散文字里硬抠，价格数字也有
+data-main-price 这种现成属性可以直接拿。
 
-商品卡片本身带一堆 data-* 属性（data-product-code、data-merchandise-
-category 这些），解析这块比 Metro 更省事，不用从零散文字里硬抠。
-
-⚠️ 如果哪天这个网站又改版了、又抓不到东西了，把 HEADLESS 改成 False 弹出
-真窗口看看卡在哪一步，是最快的排查方式。
+⚠️ 跟 T&T 一样，这个网站有 Cloudflare 防护，需要一份"看起来像真人逛出来的"
+Cookie 才能稳定访问。打开浏览器，F12 -> Network，访问一次
+https://www.foodbasics.ca/online-grocery/flyer?sortOrder=relevance&filter=%3Arelevance%3Adeal%3AFlyer+%26+Deals
+点一下"加载更多"触发 more-product 请求，右键 Copy -> Copy as cURL，把
+-b "xxx" 引号里那一整段 Cookie 复制出来，粘到下面 COOKIE_HEADER 里。
+跟 T&T 那版一样，Cookie 可能会过期，过期了重新抓一份换上就行；也可能
+（就像 T&T 那次一样）光靠 curl_cffi 的 TLS 指纹就够用，不一定非要带
+Cookie，可以先留空试试。
 """
 
 import json
+import os
 import re
 import shutil
 import sys
@@ -45,7 +44,19 @@ from datetime import datetime
 from typing import Optional
 from urllib.parse import urljoin
 
-from playwright.sync_api import sync_playwright
+try:
+    from curl_cffi import requests
+    from curl_cffi.requests.exceptions import RequestException
+    HAS_CURL_CFFI = True
+except ImportError:
+    import requests
+    from requests.exceptions import RequestException
+    HAS_CURL_CFFI = False
+    print(
+        "[foodbasics] ⚠️ 没装 curl_cffi，退回普通 requests 库——大概率会被 Cloudflare 拦下来。\n"
+        "[foodbasics] 强烈建议先执行: pip install curl_cffi\n"
+    )
+
 from bs4 import BeautifulSoup
 
 for _stream in (sys.stdout, sys.stderr):
@@ -53,24 +64,43 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8", errors="replace")
 
 BASE_URL = "https://www.foodbasics.ca"
-FLYER_URL = (
-    "https://www.foodbasics.ca/online-grocery/flyer"
-    "?sortOrder=relevance&filter=%3Arelevance%3Adeal%3AFlyer+%26+Deals"
-)
+API_URL = f"{BASE_URL}/flyer/more-product"
 
-HEADLESS = True  # 部署到 GitHub Actions 用 True；本地排查问题想看窗口就改 False
-USE_REAL_CHROME = True
-MAX_ROUNDS = 100  # "加载更多"（点击或滚动）最多尝试这么多轮，安全上限
+# ⚠️ 本地跑的时候不带 Cookie 也能过（curl_cffi 的 TLS 指纹在家庭网络下够用），
+# 但部署到 GitHub Actions 之后发现会被 403——Actions 的服务器是数据中心 IP，
+# Cloudflare 对这类 IP 通常审得更严，光有 TLS 指纹不够，需要一份真实 Cookie
+# （包含 cf_clearance 这一项）。
+#
+# Cookie 优先从环境变量 FOODBASICS_COOKIE 读（GitHub Actions 用 Secret 注入），
+# 本地手动测试图方便的话，可以把下面这个兜底值直接改成你复制的 Cookie，
+# 但提交到仓库前记得清空，别把 Cookie 提交上去。
+COOKIE_HEADER = os.environ.get("FOODBASICS_COOKIE", "")
 
-_STEALTH_INIT_SCRIPT = """
-Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-window.chrome = window.chrome || { runtime: {} };
-"""
+FILTER_VALUE = ":relevance:deal:Flyer & Deals"
 
-LOAD_MORE_BUTTON_SELECTOR = "button[data-load-more-ajax-url]"
-LOAD_MORE_TEXT_CANDIDATES = ["Load More", "See More", "Show More", "View More"]
+HEADERS = {
+    "accept": "*/*",
+    "accept-language": "en",
+    "content-type": "application/json",
+    "priority": "u=1, i",
+    "referer": f"{BASE_URL}/online-grocery/flyer?sortOrder=relevance&filter=%3Arelevance%3Adeal%3AFlyer+%26+Deals",
+    "sec-ch-ua": '"Not=A?Brand";v="99", "Google Chrome";v="124", "Chromium";v="124"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "user-agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "x-requested-with": "XMLHttpRequest",
+}
+if COOKIE_HEADER:
+    HEADERS["cookie"] = COOKIE_HEADER
 
-ONETRUST_ACCEPT_SELECTOR = "#onetrust-accept-btn-handler"
+REQUEST_DELAY_SECONDS = 2.0
+MAX_PAGES = 60
 
 _UNIT_MAP = {
     "each": "each",
@@ -81,17 +111,6 @@ _UNIT_MAP = {
     "millilitre": "/ml",
     "milliliter": "/ml",
 }
-
-
-def dismiss_cookie_banner(page) -> None:
-    try:
-        btn = page.locator(ONETRUST_ACCEPT_SELECTOR)
-        if btn.is_visible(timeout=3000):
-            btn.click(timeout=3000)
-            print("[foodbasics] 关掉了 OneTrust Cookie 同意横幅")
-            page.wait_for_timeout(500)
-    except Exception:
-        pass  # 没弹出来这个横幅就算了，不影响后续
 
 
 def money(text: Optional[str]) -> Optional[float]:
@@ -160,147 +179,84 @@ def parse_tile(tile) -> Optional[dict]:
     }
 
 
-def _get_all_items_once() -> list:
+def build_params(page: int) -> dict:
+    return {
+        "currentPage": page,
+        "sortOrder": "relevance",
+        "filter": FILTER_VALUE,
+    }
+
+
+def make_session():
+    if HAS_CURL_CFFI:
+        return requests.Session(impersonate="chrome124")
+    return requests.Session()
+
+
+def diagnose_403(resp) -> None:
+    print("[foodbasics] ------------------------------------------------------------")
+    print("[foodbasics] 收到 403，大概率是：")
+    print("[foodbasics]   1) COOKIE_HEADER 过期了/需要重新抓 —— 去浏览器重新抓一份最新的粘进去")
+    print("[foodbasics]   2) 没装 curl_cffi，普通 requests 的 TLS 指纹被识别出来了")
+    print("[foodbasics] 返回内容前300字符，供排查：")
+    try:
+        print("[foodbasics] " + resp.text[:300].replace("\n", " "))
+    except Exception:
+        pass
+    print("[foodbasics] ------------------------------------------------------------")
+
+
+def fetch_page(session, page: int) -> str:
+    resp = session.get(API_URL, params=build_params(page), headers=HEADERS, timeout=20)
+    print(f"[foodbasics] GET page={page} -> {resp.status_code}, {len(resp.text)} bytes")
+    if resp.status_code == 403:
+        diagnose_403(resp)
+    resp.raise_for_status()
+    return resp.text
+
+
+def get_all_items() -> list:
+    session = make_session()
+    print(f"[foodbasics] curl_cffi 可用: {HAS_CURL_CFFI}")
+    if not COOKIE_HEADER:
+        print("[foodbasics] COOKIE_HEADER 是空的，先试试光靠 TLS 指纹能不能过（不一定需要 Cookie）")
+
     all_items = []
-    seen_skus = set()
 
-    with sync_playwright() as p:
-        if USE_REAL_CHROME:
-            try:
-                browser = p.chromium.launch(headless=HEADLESS, channel="chrome")
-            except Exception as e:
-                print(f"[foodbasics] 用真 Chrome 启动失败：{e}，退回 Playwright 自带 Chromium。")
-                browser = p.chromium.launch(headless=HEADLESS)
-        else:
-            browser = p.chromium.launch(headless=HEADLESS)
-
-        page = browser.new_page(locale="en-CA")
-        page.add_init_script(_STEALTH_INIT_SCRIPT)
-
-        print(f"[foodbasics] 打开页面 {FLYER_URL} ...")
+    for page in range(1, MAX_PAGES + 1):
         try:
-            page.goto(FLYER_URL, wait_until="domcontentloaded", timeout=60000)
-        except Exception as e:
-            print(f"[foodbasics] 页面加载失败/超时：{e}")
-            browser.close()
-            return []
-
-        page.wait_for_timeout(4000)
-        dismiss_cookie_banner(page)
-
-        ajax_fired = {"count": 0}
-
-        def on_response(response):
-            if "more-product" in response.url:
-                ajax_fired["count"] += 1
-
-        page.on("response", on_response)
-
-        def extract_from_current_page():
-            html = page.content()
-            soup = BeautifulSoup(html, "html.parser")
-            tiles = soup.select("div.default-product-tile")
-            new_count = 0
-            for t in tiles:
-                item = parse_tile(t)
-                if not item:
-                    continue
-                sku = item.get("sku")
-                if sku and sku not in seen_skus:
-                    seen_skus.add(sku)
-                    all_items.append(item)
-                    new_count += 1
-            return len(tiles), new_count
-
-        total_tiles, new_count = extract_from_current_page()
-        print(f"[foodbasics] 首屏解析到 {total_tiles} 个商品卡片（新增 {new_count} 个）")
-
-        if total_tiles == 0:
-            print(
-                "[foodbasics] 首屏就是空的——可能被 Cloudflare 拦了，或者网站结构变了。"
-                "把 HEADLESS 改成 False 弹窗口出来看看是哪种情况。"
-            )
-            browser.close()
-            return all_items
-
-        rounds = 0
-        stable_rounds = 0
-        while rounds < MAX_ROUNDS:
-            before_count = len(all_items)
-            before_ajax_count = ajax_fired["count"]
-
-            button = page.locator(LOAD_MORE_BUTTON_SELECTOR).first
-            found_by_attribute = True
+            html = fetch_page(session, page)
+        except RequestException as e:
+            print(f"[foodbasics] 第 {page} 页请求失败：{e}，等5秒后重试一次...")
+            time.sleep(5)
             try:
-                if not button.is_visible(timeout=1500):
-                    found_by_attribute = False
-            except Exception:
-                found_by_attribute = False
+                html = fetch_page(session, page)
+            except RequestException as e2:
+                print(f"[foodbasics] 第 {page} 页重试仍失败：{e2}，停止翻页。")
+                break
 
-            if not found_by_attribute:
-                button = None
-                for text in LOAD_MORE_TEXT_CANDIDATES:
-                    try:
-                        candidate = page.get_by_text(text, exact=False).first
-                        if candidate.is_visible(timeout=800):
-                            button = candidate
-                            break
-                    except Exception:
-                        continue
+        soup = BeautifulSoup(html, "html.parser")
 
-            if button is not None:
-                try:
-                    button.scroll_into_view_if_needed(timeout=5000)
-                    page.wait_for_timeout(300)
-                    button.click(timeout=5000, force=True)
-                except Exception as e:
-                    print(f"[foodbasics] 点击按钮失败：{e}，改试滚动。")
-                    page.mouse.wheel(0, 3000)
-            else:
-                page.mouse.wheel(0, 3000)
+        has_more_el = soup.select_one("[data-has-more-product-to-load]")
+        has_more = (has_more_el.get("data-has-more-product-to-load") == "true") if has_more_el else False
 
-            rounds += 1
-            page.wait_for_timeout(4000)
+        tiles = soup.select("div.default-product-tile")
+        if not tiles:
+            print(f"[foodbasics] 第 {page} 页没有商品卡片，停止翻页。")
+            break
 
-            if ajax_fired["count"] == before_ajax_count:
-                print(f"[foodbasics] ⚠️ 第 {rounds} 轮之后没侦测到 more-product 请求。")
+        page_items = [parse_tile(t) for t in tiles]
+        page_items = [i for i in page_items if i]
+        print(f"[foodbasics] 第 {page} 页解析到 {len(page_items)} 个商品（has_more={has_more}）")
+        all_items.extend(page_items)
 
-            total_tiles, new_count = extract_from_current_page()
-            print(f"[foodbasics] 第 {rounds} 轮后，累计 {len(all_items)} 个商品（本轮新增 {new_count} 个）")
+        if not has_more:
+            print(f"[foodbasics] 接口显示没有更多商品了（第 {page} 页），停止翻页。")
+            break
 
-            if len(all_items) == before_count:
-                stable_rounds += 1
-                if stable_rounds >= 5:
-                    print("[foodbasics] 连续几轮都没有新商品，判断到底了，停止。")
-                    break
-            else:
-                stable_rounds = 0
-
-        browser.close()
+        time.sleep(REQUEST_DELAY_SECONDS)
 
     return all_items
-
-
-def get_all_items(max_attempts: int = 3) -> list:
-    """套一层重试——Cloudflare 这类防护不一定每次都拦，第一次拿到 0 个不代表
-    第二次也一定不行，多试几次，中间隔一段时间再试（不是死循环立刻重试，
-    给它一点"冷静时间"）。"""
-    for attempt in range(1, max_attempts + 1):
-        if attempt > 1:
-            wait = 15 * attempt
-            print(f"[foodbasics] 第 {attempt} 次尝试，先等 {wait} 秒再重试...")
-            time.sleep(wait)
-
-        items = _get_all_items_once()
-        if items:
-            if attempt > 1:
-                print(f"[foodbasics] 第 {attempt} 次尝试成功了")
-            return items
-
-        print(f"[foodbasics] 第 {attempt} 次尝试抓到 0 个商品。")
-
-    print(f"[foodbasics] 连续 {max_attempts} 次都抓到 0 个，大概率不是偶发问题，放弃重试。")
-    return []
 
 
 if __name__ == "__main__":
