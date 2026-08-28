@@ -40,6 +40,7 @@ import json
 import re
 import shutil
 import sys
+import time
 from datetime import datetime
 from typing import Optional
 from urllib.parse import urljoin
@@ -159,7 +160,7 @@ def parse_tile(tile) -> Optional[dict]:
     }
 
 
-def get_all_items() -> list:
+def _get_all_items_once() -> list:
     all_items = []
     seen_skus = set()
 
@@ -278,6 +279,28 @@ def get_all_items() -> list:
         browser.close()
 
     return all_items
+
+
+def get_all_items(max_attempts: int = 3) -> list:
+    """套一层重试——Cloudflare 这类防护不一定每次都拦，第一次拿到 0 个不代表
+    第二次也一定不行，多试几次，中间隔一段时间再试（不是死循环立刻重试，
+    给它一点"冷静时间"）。"""
+    for attempt in range(1, max_attempts + 1):
+        if attempt > 1:
+            wait = 15 * attempt
+            print(f"[foodbasics] 第 {attempt} 次尝试，先等 {wait} 秒再重试...")
+            time.sleep(wait)
+
+        items = _get_all_items_once()
+        if items:
+            if attempt > 1:
+                print(f"[foodbasics] 第 {attempt} 次尝试成功了")
+            return items
+
+        print(f"[foodbasics] 第 {attempt} 次尝试抓到 0 个商品。")
+
+    print(f"[foodbasics] 连续 {max_attempts} 次都抓到 0 个，大概率不是偶发问题，放弃重试。")
+    return []
 
 
 if __name__ == "__main__":

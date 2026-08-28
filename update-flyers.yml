@@ -1,0 +1,33 @@
+name: Update Flyer Prices
+
+on:
+  workflow_dispatch:        # 手动触发入口，cron-job.org 现在就是调这个 API 来触发定时任务的
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: |
+          pip install requests beautifulsoup4 curl_cffi playwright
+          playwright install --with-deps chromium chrome
+
+      - name: Scrape all stores and update data.json
+        env:
+          TNT_COOKIE: ${{ secrets.TNT_COOKIE }}
+        run: python run_all.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Auto-update flyer data $(date -u +%Y-%m-%d)"
+          git push
