@@ -261,6 +261,132 @@
     justify-content:space-between;
     align-items:flex-start;
   }
+  .select-checkbox{
+    width:20px;
+    height:20px;
+    border-radius:5px;
+    border:2px solid var(--card-line);
+    background:rgba(255,255,255,0.9);
+    cursor:pointer;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:900;
+    color:transparent;
+    transition:all .12s ease;
+  }
+  .select-checkbox:hover{border-color:var(--green);}
+  .select-checkbox.checked{
+    background:var(--green);
+    border-color:var(--green);
+    color:#fff;
+  }
+
+  /* ---------- Compare bar (fixed at bottom) ---------- */
+  .compare-bar{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:var(--bg-soft);
+    border-top:2px solid var(--gold);
+    padding:12px 24px;
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    z-index:100;
+    box-shadow:0 -4px 20px rgba(0,0,0,0.35);
+    font-family:'Noto Sans SC',sans-serif;
+  }
+  .compare-bar.visible{display:flex;}
+  .compare-bar-count{color:var(--cream); font-size:14px; font-weight:600;}
+  .compare-bar-actions{display:flex; gap:10px;}
+  .compare-bar button{
+    font-family:'Noto Sans SC',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    border-radius:8px;
+    padding:8px 18px;
+    cursor:pointer;
+    border:none;
+  }
+  .compare-bar-view-btn{background:var(--gold); color:var(--bg);}
+  .compare-bar-clear-btn{background:transparent; color:var(--cream); border:1px solid rgba(245,239,224,0.4) !important;}
+
+  /* ---------- Compare modal ---------- */
+  .compare-modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(10,20,17,0.75);
+    z-index:200;
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 20px;
+    overflow-y:auto;
+  }
+  .compare-modal-overlay.visible{display:flex;}
+  .compare-modal{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:10px;
+    max-width:1100px;
+    width:100%;
+    padding:24px;
+    font-family:'Noto Sans SC',sans-serif;
+  }
+  .compare-modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .compare-modal-header h2{margin:0; font-size:20px;}
+  .compare-modal-close{
+    background:none; border:none; cursor:pointer;
+    font-size:22px; color:var(--ink-soft); line-height:1;
+  }
+  .compare-modal-close:hover{color:var(--red);}
+  .compare-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+    gap:16px;
+  }
+  .compare-item{
+    border:1px solid var(--card-line);
+    border-radius:8px;
+    padding:12px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .compare-item-remove{
+    position:absolute; top:6px; right:6px;
+    background:rgba(255,255,255,0.9);
+    border:none; border-radius:50%;
+    width:22px; height:22px;
+    cursor:pointer; font-size:14px; line-height:1;
+    color:var(--red);
+  }
+  .compare-item-img{
+    width:100%; aspect-ratio:1/1;
+    border-radius:5px; overflow:hidden;
+    background:var(--cream);
+  }
+  .compare-item-img img{width:100%; height:100%; object-fit:cover; display:block;}
+  .compare-item-store{
+    font-family:'Roboto Mono',monospace;
+    font-size:10px; font-weight:700;
+    color:#fff; background:var(--green);
+    display:inline-block; padding:2px 6px; border-radius:4px;
+    width:fit-content;
+  }
+  .compare-item-name{font-size:13px; font-weight:700; margin:0;}
+  .compare-item-price{display:flex; align-items:baseline; gap:6px;}
+  .compare-item-price .price{font-family:'Archivo Black',sans-serif; font-size:18px; color:var(--red);}
+  .compare-item-price .orig{font-size:11px; color:var(--ink-soft); text-decoration:line-through;}
+  .compare-item-unit{font-size:11px; color:var(--ink-soft);}
   .item-image{
     width:100%;
     aspect-ratio:1/1;
@@ -418,6 +544,24 @@
   <a href="#" id="repoLink">GitHub</a>
 </footer>
 
+<div class="compare-bar" id="compareBar">
+  <span class="compare-bar-count" id="compareBarCount">已选 0 个商品</span>
+  <div class="compare-bar-actions">
+    <button class="compare-bar-clear-btn" id="compareClearBtn">清空</button>
+    <button class="compare-bar-view-btn" id="compareViewBtn">查看对比</button>
+  </div>
+</div>
+
+<div class="compare-modal-overlay" id="compareModalOverlay">
+  <div class="compare-modal">
+    <div class="compare-modal-header">
+      <h2>商品对比</h2>
+      <button class="compare-modal-close" id="compareModalCloseBtn">&times;</button>
+    </div>
+    <div class="compare-grid" id="compareGrid"></div>
+  </div>
+</div>
+
 <script>
 // 内嵌兜底数据：当 fetch('data.json') 因 file:// 本地打开被浏览器拦截，
 // 或 data.json 缺失/加载失败时，自动使用这份数据，保证页面始终可用。
@@ -429,6 +573,11 @@ let activeStores = new Set();
 let activeCategories = new Set();
 let currentQuery = "";
 let currentSort = "discount-pct";
+// 选中的商品用 Set 存"商品对象本身的引用"，不是另外造一个 id 字段——
+// DATA.items 这个数组一旦加载完就不会被重建（render() 只是从里面筛选/
+// 排序出子集，筛出来的还是同一批对象），所以用对象引用当 key 完全够用，
+// 页面重新渲染（比如换排序、切换筛选）也不会丢失已经选中的状态。
+let selectedItems = new Set();
 
 async function loadData(){
   try{
@@ -565,9 +714,13 @@ function render(){
         card.classList.add('clickable');
         card.addEventListener('click', () => window.open(item.url, '_blank', 'noopener'));
       }
+      const isSelected = selectedItems.has(item);
       card.innerHTML = `
         <div class="card-top">
-          <span class="store-badge" style="--badge-color:${s.color}">${s.nameZh}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div class="select-checkbox ${isSelected ? 'checked' : ''}" data-select>&#10003;</div>
+            <span class="store-badge" style="--badge-color:${s.color}">${s.nameZh}</span>
+          </div>
           <div class="discount-stamp">-${pct}%</div>
         </div>
         ${item.image
@@ -583,6 +736,18 @@ function render(){
         </div>
         ${item.validFrom && item.validTo ? `<div class="valid">有效期 ${item.validFrom} ~ ${item.validTo}</div>` : ''}
       `;
+      const checkbox = card.querySelector('[data-select]');
+      checkbox.addEventListener('click', (e) => {
+        e.stopPropagation();  // 别让点击选择框也触发卡片本身"打开链接"的点击事件
+        if(selectedItems.has(item)){
+          selectedItems.delete(item);
+          checkbox.classList.remove('checked');
+        } else {
+          selectedItems.add(item);
+          checkbox.classList.add('checked');
+        }
+        updateCompareBar();
+      });
       grid.appendChild(card);
   });
 }
@@ -628,6 +793,66 @@ document.getElementById('selectAllCategoryBtn').addEventListener('click', () => 
 document.getElementById('deselectAllCategoryBtn').addEventListener('click', () => {
   activeCategories.clear();
   document.querySelectorAll('.category-chip').forEach(btn => btn.classList.remove('active'));
+  render();
+});
+
+// ---------- 商品对比功能 ----------
+function updateCompareBar(){
+  const bar = document.getElementById('compareBar');
+  const count = selectedItems.size;
+  document.getElementById('compareBarCount').textContent = `已选 ${count} 个商品`;
+  bar.classList.toggle('visible', count > 0);
+}
+
+function renderCompareModal(){
+  const grid = document.getElementById('compareGrid');
+  grid.innerHTML = '';
+  selectedItems.forEach(item => {
+    const s = storeMeta(item.store);
+    const div = document.createElement('div');
+    div.className = 'compare-item';
+    div.innerHTML = `
+      <button class="compare-item-remove" data-remove>&times;</button>
+      ${item.image
+        ? `<div class="compare-item-img"><img src="${item.image}" alt="" onerror="this.style.display='none'"></div>`
+        : ''}
+      <span class="compare-item-store">${s.nameZh}</span>
+      <p class="compare-item-name">${item.nameEn}</p>
+      <div class="compare-item-price">
+        <span class="price">$${item.price.toFixed(2)}</span>
+        <span class="orig">$${item.originalPrice.toFixed(2)}</span>
+      </div>
+      <span class="compare-item-unit">${item.unit}</span>
+    `;
+    div.querySelector('[data-remove]').addEventListener('click', () => {
+      selectedItems.delete(item);
+      updateCompareBar();
+      renderCompareModal();
+      render();  // 同步刷新商品列表里对应卡片的选中状态
+      if(selectedItems.size === 0){
+        closeCompareModal();
+      }
+    });
+    grid.appendChild(div);
+  });
+}
+
+function openCompareModal(){
+  renderCompareModal();
+  document.getElementById('compareModalOverlay').classList.add('visible');
+}
+function closeCompareModal(){
+  document.getElementById('compareModalOverlay').classList.remove('visible');
+}
+
+document.getElementById('compareViewBtn').addEventListener('click', openCompareModal);
+document.getElementById('compareModalCloseBtn').addEventListener('click', closeCompareModal);
+document.getElementById('compareModalOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'compareModalOverlay') closeCompareModal();  // 点弹窗外围空白处也能关掉
+});
+document.getElementById('compareClearBtn').addEventListener('click', () => {
+  selectedItems.clear();
+  updateCompareBar();
   render();
 });
 
