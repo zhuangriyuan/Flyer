@@ -47,7 +47,6 @@ DEFAULT_STORES = [
     {"id": "loblaws",   "name": "Loblaws",        "nameZh": "Loblaws",   "color": "#F2B705"},
     {"id": "nofrills",  "name": "No Frills",      "nameZh": "No Frills", "color": "#E1483C"},
     {"id": "longos",    "name": "Longo's",        "nameZh": "Longo's",  "color": "#4A7862"},
-    {"id": "foodbasics","name": "Food Basics",    "nameZh": "Food Basics","color": "#C9812E"},
     {"id": "tnt",       "name": "T&T",            "nameZh": "大统华",     "color": "#B4231F"},
     {"id": "metro",     "name": "Metro",          "nameZh": "Metro",    "color": "#E1483C"},
     {"id": "galleria",  "name": "Galleria",       "nameZh": "家乐",       "color": "#8C4A2F"},

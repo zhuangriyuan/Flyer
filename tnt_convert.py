@@ -90,6 +90,7 @@ def convert():
             "validFrom": item.get("validFrom"),
             "validTo": item.get("validTo"),
             "url": item.get("url"),
+            "image": item.get("image"),
         })
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

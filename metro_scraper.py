@@ -130,6 +130,13 @@ def parse_tile(tile) -> dict:
 
     discount_percent = attr("data-discount-percent")
 
+    # 商品卡片里有好几个 <img>（收藏心形图标、加拿大产地小旗子图标……），
+    # 真正的商品图片链接域名固定是 product-images.metro.ca，用这个筛出来，
+    # 比排除掉那些图标 class 更准（试过排除 class 的办法，41个tile里有
+    # 10个会认错成旗子图标，换成认域名之后41个里40个都能拿到）。
+    img_el = tile.select_one('img[src*="product-images"]')
+    image = img_el.get("src") if img_el else None
+
     return {
         "product_code": attr("data-product-code"),
         "name_en": attr("data-product-name-en") or attr("data-product-name"),
@@ -141,6 +148,7 @@ def parse_tile(tile) -> dict:
         "sale_price_text": parse_sale_price_text(tile),
         "discount_percent": int(discount_percent) if discount_percent else None,
         "is_promo": dimension == "PROMO",
+        "image": image,
         "link": link,
     }
 

@@ -144,6 +144,7 @@ def convert():
             "validFrom": item.get("validFrom"),
             "validTo": item.get("validTo"),
             "url": item.get("webUrl") or LONGOS_FLYER_URL,
+            "image": item.get("imageUrl"),
         })
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

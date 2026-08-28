@@ -60,6 +60,17 @@ def parse_tile(tile) -> Optional[dict]:
         m = re.search(r"prodBarcode=([^&]+)", href)
         barcode = m.group(1) if m else None
 
+    # ✅ 已用实测截图核对过——图片不在 <img> 标签里（那个 src 是固定的
+    # /images/dummy.png 占位符，估计是给屏幕阅读器用的），真正的图片是
+    # 设置在 a.product-image 这个链接自己的 CSS background-image 上：
+    #     style="background-image:url('/images/Product/883298615237.jpg')"
+    # 从这个 style 属性里用正则把网址抠出来，链接是相对路径，要拼上域名。
+    image = None
+    style_attr = img_link.get("style", "")
+    m_bg = re.search(r"background-image\s*:\s*url\(['\"]?([^'\")]+)['\"]?\)", style_attr)
+    if m_bg:
+        image = urljoin(BASE_URL, m_bg.group(1))
+
     is_sale = tile.select_one(".sale-label") is not None
 
     price_box = tile.select_one(".price-box")
@@ -83,6 +94,7 @@ def parse_tile(tile) -> Optional[dict]:
         "unit": unit_el.get_text(strip=True) if unit_el else None,
         "is_sale": is_sale,
         "link": urljoin(BASE_URL, href) if href else None,
+        "image": image,
     }
 
 

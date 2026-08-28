@@ -130,6 +130,33 @@ def parse_money(text: Optional[str]) -> Optional[float]:
     return float(m.group()) if m else None
 
 
+def extract_image(tile: dict) -> Optional[str]:
+    """✅ 已用实测数据核对过——接口里 image 字段长这样（一个数组，元素是
+    带好几种尺寸链接的对象）：
+        "image": [{
+            "imageUrl": "...1200.png",      # 原图，太大
+            "mediumUrl": "...400.png",      # 卡片用这个大小刚好
+            "smallUrl": "...250.png",
+            "thumbnailUrl": "...120.png",   # 太小，糊
+            ...
+        }]
+    取第一张图的 mediumUrl，没有就退而求其次找别的尺寸。
+    """
+    images = tile.get("image")
+    if isinstance(images, list) and images and isinstance(images[0], dict):
+        first = images[0]
+        return (
+            first.get("mediumUrl")
+            or first.get("smallUrl")
+            or first.get("largeUrl")
+            or first.get("imageUrl")
+            or first.get("thumbnailUrl")
+        )
+    if isinstance(images, str):  # 万一哪天接口格式变回纯字符串，也兜住
+        return images
+    return None
+
+
 def parse_tile(tile: dict) -> dict:
     pricing = tile.get("pricing") or {}
     deal = tile.get("deal") or {}
@@ -143,6 +170,7 @@ def parse_tile(tile: dict) -> dict:
         "packageSizing": tile.get("packageSizing"),
         "dealType": deal.get("type"),  # SALE / LIMIT / 或者其他没见过的值，原样存下来
         "link": (BASE_URL + link) if link else None,
+        "image": extract_image(tile),
     }
 
 

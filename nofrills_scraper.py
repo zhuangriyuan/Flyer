@@ -96,6 +96,25 @@ def parse_money(text: Optional[str]) -> Optional[float]:
     return float(m.group()) if m else None
 
 
+def extract_image(tile: dict) -> Optional[str]:
+    """✅ 已用实测数据核对过（跟 loblaws_scraper.py 同款接口，同样的结构）——
+    image 字段是一个数组，元素是带好几种尺寸链接的对象，取第一张图的
+    mediumUrl，没有就退而求其次找别的尺寸。"""
+    images = tile.get("image")
+    if isinstance(images, list) and images and isinstance(images[0], dict):
+        first = images[0]
+        return (
+            first.get("mediumUrl")
+            or first.get("smallUrl")
+            or first.get("largeUrl")
+            or first.get("imageUrl")
+            or first.get("thumbnailUrl")
+        )
+    if isinstance(images, str):
+        return images
+    return None
+
+
 def parse_tile(tile: dict) -> dict:
     pricing = tile.get("pricing") or {}
     deal = tile.get("deal") or {}
@@ -109,6 +128,7 @@ def parse_tile(tile: dict) -> dict:
         "packageSizing": tile.get("packageSizing"),
         "dealType": deal.get("type"),  # "SALE" 才是真降价，"LIMIT" 只是限购提示
         "link": (BASE_URL + link) if link else None,
+        "image": extract_image(tile),
     }
 
 

@@ -62,6 +62,7 @@ def convert():
             "validFrom": None,
             "validTo": None,
             "url": item.get("link"),
+            "image": item.get("image"),
         })
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:

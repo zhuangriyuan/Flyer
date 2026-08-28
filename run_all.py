@@ -56,7 +56,6 @@ STORES = [
     ("Metro",       "metro_scraper.py",      "metro_convert.py"),
     ("No Frills",   "nofrills_scraper.py",   "nofrills_convert.py"),
     ("Galleria",    "galleria_scraper.py",   "galleria_convert.py"),
-    ("Food Basics", "foodbasics_scraper.py", "foodbasics_convert.py"),
     ("Longo's",     "longos_scraper.py",     "longos_convert.py"),
 ]
 
