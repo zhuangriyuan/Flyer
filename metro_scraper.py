@@ -168,6 +168,26 @@ def parse_tile(tile) -> dict:
     }
 
 
+def scroll_through_page(page) -> None:
+    """把当前页面从上到下慢慢滚一遍，触发所有已加载商品卡片的图片懒加载
+    （不是死等一个固定秒数，而是主动"路过"每个位置逼图片加载）。滚完再
+    回到底部（"加载更多"按钮一般在最底下，方便后续继续点）。"""
+    try:
+        height = page.evaluate("document.body.scrollHeight")
+        step = 900
+        pos = 0
+        while pos < height:
+            page.mouse.wheel(0, step)
+            page.wait_for_timeout(200)
+            pos += step
+            new_height = page.evaluate("document.body.scrollHeight")
+            if new_height > height:
+                height = new_height  # 滚动过程中可能触发新内容，跟着往下滚够
+        page.wait_for_timeout(500)  # 给最后一批图片留点加载时间
+    except Exception:
+        pass  # 滚动失败不影响主流程，最多就是有几张图没触发懒加载
+
+
 def get_all_flyer_items() -> list:
     all_items = []
     seen_codes = set()
@@ -195,6 +215,7 @@ def get_all_flyer_items() -> list:
 
         page.wait_for_timeout(4000)
         dismiss_cookie_banner(page)
+        scroll_through_page(page)  # 触发首屏所有商品的图片懒加载
 
         ajax_fired = {"count": 0}
 
@@ -266,6 +287,7 @@ def get_all_flyer_items() -> list:
                 break
 
             page.wait_for_timeout(4000)
+            scroll_through_page(page)  # 触发这一批新加载商品的图片懒加载
 
             if ajax_fired["count"] == before_ajax_count:
                 print(f"[metro] ⚠️ 第 {clicks} 次点击后没侦测到 more-product 请求，"

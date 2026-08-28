@@ -390,7 +390,11 @@
 </div>
 <div class="stores" id="storeFilters"></div>
 
-<div class="stores" id="categoryFilters" style="margin-top:10px;"></div>
+<div class="stores-header" style="margin-top:10px;">
+  <button id="selectAllCategoryBtn" class="select-all-btn">全选</button>
+  <button id="deselectAllCategoryBtn" class="select-all-btn">取消全选</button>
+</div>
+<div class="stores" id="categoryFilters"></div>
 
 <main>
   <div class="results-meta">
@@ -611,6 +615,19 @@ document.getElementById('selectAllBtn').addEventListener('click', () => {
 document.getElementById('deselectAllBtn').addEventListener('click', () => {
   activeStores.clear();
   document.querySelectorAll('.store-chip').forEach(btn => btn.classList.remove('active'));
+  render();
+});
+
+document.getElementById('selectAllCategoryBtn').addEventListener('click', () => {
+  document.querySelectorAll('.category-chip').forEach(btn => {
+    activeCategories.add(btn.dataset.category);
+    btn.classList.add('active');
+  });
+  render();
+});
+document.getElementById('deselectAllCategoryBtn').addEventListener('click', () => {
+  activeCategories.clear();
+  document.querySelectorAll('.category-chip').forEach(btn => btn.classList.remove('active'));
   render();
 });
 
