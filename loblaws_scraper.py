@@ -130,30 +130,53 @@ def parse_money(text: Optional[str]) -> Optional[float]:
     return float(m.group()) if m else None
 
 
+_debug_printed_count = {"n": 0}
+
+
 def extract_image(tile: dict) -> Optional[str]:
-    """✅ 已用实测数据核对过——接口里 image 字段长这样（一个数组，元素是
-    带好几种尺寸链接的对象）：
-        "image": [{
-            "imageUrl": "...1200.png",      # 原图，太大
-            "mediumUrl": "...400.png",      # 卡片用这个大小刚好
-            "smallUrl": "...250.png",
-            "thumbnailUrl": "...120.png",   # 太小，糊
-            ...
-        }]
-    取第一张图的 mediumUrl，没有就退而求其次找别的尺寸。
+    """真正的字段名是 productImage（不是 image，之前猜错了字段名——2026-08
+    最新实测确认，抓包截图里显示的 key 列表里没有 image，只有
+    productImage）。这版同时兼容几种可能的数据形状（直接字符串 / 数组 /
+    单个对象），实在都不匹配才退回打印诊断信息。
     """
-    images = tile.get("image")
-    if isinstance(images, list) and images and isinstance(images[0], dict):
-        first = images[0]
-        return (
-            first.get("mediumUrl")
-            or first.get("smallUrl")
-            or first.get("largeUrl")
-            or first.get("imageUrl")
-            or first.get("thumbnailUrl")
+    candidate = tile.get("productImage")
+
+    # 情况1：本来就是一个网址字符串
+    if isinstance(candidate, str) and candidate:
+        return candidate
+
+    # 情况2：是个数组，元素可能是"带好几种尺寸链接的对象"，也可能元素本身
+    # 就是字符串
+    if isinstance(candidate, list) and candidate:
+        first = candidate[0]
+        if isinstance(first, dict):
+            got = (
+                first.get("mediumUrl") or first.get("smallUrl")
+                or first.get("largeUrl") or first.get("imageUrl")
+                or first.get("thumbnailUrl") or first.get("url")
+            )
+            if got:
+                return got
+        elif isinstance(first, str) and first:
+            return first
+
+    # 情况3：不是数组，是单个对象，直接带尺寸字段
+    if isinstance(candidate, dict):
+        got = (
+            candidate.get("mediumUrl") or candidate.get("smallUrl")
+            or candidate.get("largeUrl") or candidate.get("imageUrl")
+            or candidate.get("thumbnailUrl") or candidate.get("url")
+            or candidate.get("src")
         )
-    if isinstance(images, str):  # 万一哪天接口格式变回纯字符串，也兜住
-        return images
+        if got:
+            return got
+
+    # 🔍 临时诊断：上面几种猜测都没命中，打印 productImage 实际的完整内容
+    # （不只是 key，这次要看具体值），确认完问题就可以把这段删掉。
+    if _debug_printed_count["n"] < 5:
+        _debug_printed_count["n"] += 1
+        print(f"[loblaws] 🔍 调试：productImage 的完整内容 = {candidate!r}")
+
     return None
 
 
@@ -218,7 +241,7 @@ def get_all_items() -> list:
         page_number += 1
         time.sleep(REQUEST_DELAY_SECONDS)
 
-        if page_number > 60:  # 安全上限，跑起来发现不够的话自己改大点
+        if page_number > 150:  # 安全上限（纯粹防止意外死循环，正常靠 hasMore=False 自然停）
             print("[loblaws] 翻页数量超过安全上限，停止。")
             break
 

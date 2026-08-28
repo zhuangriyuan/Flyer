@@ -131,7 +131,7 @@ def build_headers() -> dict:
 HEADERS = build_headers()
 
 REQUEST_DELAY_SECONDS = 2.5
-MAX_PAGES = 40  # 安全上限：实测总共约21页（716条/35每页），留够余量
+MAX_PAGES = 150  # 安全上限：实测总共约21页（716条/35每页），这里留了充足余量
 
 # 完整 GraphQL 查询文本，照用户抓包的原样解码出来的，一个字都没改。
 GRAPHQL_QUERY = (
