@@ -1,7 +1,12 @@
 """
-Metro.ca Flyer 爬虫 (v2 —— 基于真实页面 HTML 结构重写)
+Metro.ca Flyer 爬虫 (v3 —— 加上 Cloudflare 防护应对)
 
-依赖：pip install requests beautifulsoup4
+依赖：pip install curl_cffi beautifulsoup4
+    （不是 requests！之前那版用 requests 在 GitHub Actions 上被拦了——
+    Metro 现在也上了 Cloudflare 防护（跟同公司的 Food Basics 一样），
+    从抓包能看到 cf_clearance / __cf_bm / forterToken 这些，说明不只是
+    Cloudflare，还叠了 Forter 这个反欺诈服务。curl_cffi 能模拟真实 Chrome
+    的 TLS 握手指纹，这版换成这个。）
 
 用法：
     python metro_scraper.py
@@ -9,12 +14,12 @@ Metro.ca Flyer 爬虫 (v2 —— 基于真实页面 HTML 结构重写)
 输出：
     metro_raw.json —— 抓到的原始商品数据
 
-这一版的选择器是照着用户实际抓到的 flyer 页面 HTML 片段写的，
-不再是靠开源库猜的，所以字段应该是准的。唯一还不确定的是"翻页"，
-见下面 fetch_page() 里的说明。
+选择器这块沿用上一版（照着真实页面 HTML 结构写的，没有变），改的只是
+"怎么把请求发出去"这一层。
 """
 
 import json
+import os
 import time
 import sys
 import random
@@ -23,8 +28,24 @@ from datetime import datetime
 from typing import Optional
 from urllib.parse import urljoin
 
-import requests
+try:
+    from curl_cffi import requests
+    from curl_cffi.requests.exceptions import RequestException
+    HAS_CURL_CFFI = True
+except ImportError:
+    import requests
+    from requests.exceptions import RequestException
+    HAS_CURL_CFFI = False
+    print(
+        "[metro] ⚠️ 没装 curl_cffi，退回普通 requests 库——大概率会被 Cloudflare 拦下来。\n"
+        "[metro] 强烈建议先执行: pip install curl_cffi\n"
+    )
+
 from bs4 import BeautifulSoup
+
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 BASE_URL = "https://www.metro.ca/en/online-grocery"
 FLYER_PATH = "/flyer"
@@ -34,14 +55,33 @@ FLYER_FILTER = ":relevance:deal:Flyer & Deals"
 # 不是猜的。第1页走普通的 /flyer 页面，第2页起换成这个。
 MORE_PRODUCT_URL = "https://www.metro.ca/en/flyer/more-product"
 
+# ⚠️ 本地测试的时候不带 Cookie 也可能能过（curl_cffi 的 TLS 指纹在家庭网络下
+# 够用），但部署到 GitHub Actions 之后大概率会被 403——Actions 的服务器是
+# 数据中心 IP，Cloudflare 对这类 IP 通常审得更严。
+#
+# Cookie 优先从环境变量 METRO_COOKIE 读（GitHub Actions 用 Secret 注入），
+# 本地手动测试图方便的话，可以把下面这个兜底值直接改成你复制的 Cookie，
+# 但提交到仓库前记得清空，别把 Cookie 提交上去。
+COOKIE_HEADER = os.environ.get("METRO_COOKIE", "")
+
 HEADERS = {
-    "User-Agent": (
+    "accept": "*/*",
+    "accept-language": "en-CA,en;q=0.9",
+    "content-type": "application/json",
+    "priority": "u=1, i",
+    "sec-ch-ua": '"Not=A?Brand";v="99", "Google Chrome";v="124", "Chromium";v="124"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "user-agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
         "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     ),
-    "Accept-Language": "en-CA,en;q=0.9",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
+if COOKIE_HEADER:
+    HEADERS["cookie"] = COOKIE_HEADER
 
 REQUEST_DELAY_SECONDS = 4.0  # 放慢一点，别让请求节奏太规律、太密集
 MAX_PAGES = 120  # 总共约1586个结果，每页约16个，需要约100页
@@ -103,7 +143,26 @@ def parse_tile(tile) -> dict:
     }
 
 
-def fetch_page(session: requests.Session, page: int) -> str:
+def make_session():
+    if HAS_CURL_CFFI:
+        return requests.Session(impersonate="chrome124")
+    return requests.Session()
+
+
+def diagnose_403(resp) -> None:
+    print("[metro] ------------------------------------------------------------")
+    print("[metro] 收到 403/被重定向到不相关页面，大概率是：")
+    print("[metro]   1) METRO_COOKIE 是空的/过期了 —— 去浏览器重新抓一份最新的粘进去")
+    print("[metro]   2) 没装 curl_cffi，普通 requests 的 TLS 指纹被识别出来了")
+    print("[metro] 返回内容前300字符，供排查：")
+    try:
+        print("[metro] " + resp.text[:300].replace("\n", " "))
+    except Exception:
+        pass
+    print("[metro] ------------------------------------------------------------")
+
+
+def fetch_page(session, page: int) -> str:
     """
     page=1: 普通 flyer 页面（首屏自带的商品）。
     page>=2: "Load More Deals" 按钮背后的 AJAX 接口，currentPage 从 2 开始递增。
@@ -122,31 +181,37 @@ def fetch_page(session: requests.Session, page: int) -> str:
     if page > 1:
         # 这个接口是给页面内 JS 调用的，很多这类接口会检查这两个头，
         # 没有的话有可能返回不完整数据或直接拒绝。
-        request_headers["X-Requested-With"] = "XMLHttpRequest"
-        request_headers["Referer"] = (
+        request_headers["x-requested-with"] = "XMLHttpRequest"
+        request_headers["referer"] = (
             f"{BASE_URL}{FLYER_PATH}?sortOrder=relevance&filter={FLYER_FILTER}"
         )
 
     resp = session.get(url, params=params, headers=request_headers, timeout=20)
     print(f"[metro] GET {resp.url} -> {resp.status_code}, {len(resp.text)} bytes")
+    if resp.status_code == 403:
+        diagnose_403(resp)
     resp.raise_for_status()
     return resp.text
 
 
 def get_all_flyer_items() -> list:
-    session = requests.Session()
+    session = make_session()
+    print(f"[metro] curl_cffi 可用: {HAS_CURL_CFFI}")
+    if not COOKIE_HEADER:
+        print("[metro] METRO_COOKIE 是空的，先试试光靠 TLS 指纹能不能过（不一定需要 Cookie）")
+
     all_items = []
     seen_codes_by_page = []
 
     for page in range(1, MAX_PAGES + 1):
         try:
             html = fetch_page(session, page)
-        except requests.RequestException as e:
+        except RequestException as e:
             print(f"[metro] 第 {page} 页请求失败：{e}，重试一次...")
             time.sleep(5)
             try:
                 html = fetch_page(session, page)
-            except requests.RequestException as e2:
+            except RequestException as e2:
                 print(f"[metro] 第 {page} 页重试仍失败：{e2}，停止翻页。")
                 break
 
@@ -159,8 +224,10 @@ def get_all_flyer_items() -> list:
             print(f"[metro] 第 {page} 页没有商品卡片，停止翻页。")
             if page == 1:
                 print(
-                    "[metro] 第一页就是空的 —— 选择器可能不匹配了，"
-                    "网站结构可能又变了，需要重新用浏览器 F12 核对。"
+                    "[metro] 第一页就是空的 —— 如果上面 GET 打印出来的网址和配置的不一样"
+                    "（比如变成了别的不相关页面），大概率是被 Cloudflare 拦截重定向了，"
+                    "先确认 METRO_COOKIE 是不是过期了；如果网址本身没问题，"
+                    "才是选择器可能不匹配了，需要重新用浏览器 F12 核对。"
                 )
             break
 

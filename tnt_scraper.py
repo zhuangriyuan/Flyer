@@ -39,6 +39,7 @@ query/operationName/variables 都是照着用户在浏览器 F12 Network 面板�
 """
 
 import json
+import os
 import re
 import shutil
 import sys
@@ -71,9 +72,15 @@ GRAPHQL_URL = "https://www.tntsupermarket.com/graphql"
 CATEGORY_ID = 3222
 PAGE_SIZE = 35
 
-# ⚠️⚠️⚠️ 把浏览器 F12 里复制的完整 Cookie 粘贴到这个字符串里 ⚠️⚠️⚠️
-# 留空字符串 "" 表示不带 cookie 直接试（大概率会被 403）。
-COOKIE_HEADER = ""
+# ⚠️⚠️⚠️ 本地测试的时候不带 Cookie 也能过（curl_cffi 的 TLS 指纹在家庭网络下
+# 够用），但部署到 GitHub Actions 之后不一定还这么走运——Actions 的服务器是
+# 数据中心 IP，网站的机器人防护对这类 IP 通常审得更严，加一份真实 Cookie
+# 更保险。
+#
+# Cookie 优先从环境变量 TNT_COOKIE 读（GitHub Actions 用 Secret 注入），
+# 本地手动测试图方便的话，可以把下面这个兜底值直接改成你复制的 Cookie，
+# 但提交到仓库前记得清空，别把 Cookie 提交上去。
+COOKIE_HEADER = os.environ.get("TNT_COOKIE", "")
 
 # 这两个是"配送地址/门店"相关的头，抓包时用户本地环境是这个值。理论上
 # 不同地区/门店库存价格可能有细微差异，不影响大方向，先照抄能跑就行；

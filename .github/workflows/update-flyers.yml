@@ -22,6 +22,8 @@ jobs:
       - name: Scrape all stores and update data.json
         env:
           TNT_COOKIE: ${{ secrets.TNT_COOKIE }}
+          FOODBASICS_COOKIE: ${{ secrets.FOODBASICS_COOKIE }}
+          METRO_COOKIE: ${{ secrets.METRO_COOKIE }}
         run: python run_all.py
 
       - name: Commit updated data

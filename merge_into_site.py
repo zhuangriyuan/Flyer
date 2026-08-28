@@ -82,18 +82,35 @@ def merge():
         with open(filename, encoding="utf-8") as f:
             new_items = json.load(f)
 
-        if not new_items:
-            print(f"[merge] {filename} 是空的，跳过。")
+        # 用文件名推断 store_id（比如 tnt_converted.json -> tnt），不依赖新数据
+        # 里有具体商品才能知道是哪家超市——这是修复一个真实 bug：以前 store_id
+        # 是从 new_items[0]["store"] 读出来的，新数据是空列表（[]）的时候没法
+        # 这么读，脚本会直接跳过、不清那家超市的旧数据。结果就是某家超市哪次
+        # 抓取失败/解析出 0 条，它上周的旧数据会永远留在 data.json 里，
+        # 显示着早就不存在的"折扣"——这正是这次发现的问题。
+        if not filename.endswith("_converted.json"):
+            print(f"[merge] {filename} 文件名不符合 *_converted.json 规律，跳过。")
             continue
+        store_id = filename[: -len("_converted.json")]
 
-        store_id = new_items[0].get("store")
-        if not store_id:
-            print(f"[merge] {filename} 里的数据没有 store 字段，跳过，检查一下转换脚本。")
-            continue
+        if not new_items:
+            print(f"[merge] ⚠️ {filename} 是空的（0 条数据）——大概率是这家超市这次"
+                  f"抓取失败了，或者转换脚本出了问题；也可能是真的没有符合条件的"
+                  f"折扣商品。不管是哪种情况，都会把 {store_id} 之前的旧数据一起"
+                  f"清掉，不会让过期的旧折扣继续留在网站上，但这个警告值得回头"
+                  f"查一下这家超市的 scraper/convert 日志，确认不是真出问题了。")
 
         before_count = len(site_data["items"])
         site_data["items"] = [i for i in site_data["items"] if i.get("store") != store_id]
         removed = before_count - len(site_data["items"])
+
+        # 顺手查一下新数据里的 store 字段是不是真的跟文件名对得上，对不上说明
+        # 对应的 convert.py 里 store 字段可能写错了，早点发现早点修
+        if new_items:
+            mismatched = {i.get("store") for i in new_items} - {store_id}
+            if mismatched:
+                print(f"[merge] ⚠️ {filename} 里有商品的 store 字段是 {mismatched}，"
+                      f"跟文件名推断出的 {store_id} 对不上，检查一下对应的 convert.py。")
 
         site_data["items"].extend(new_items)
         total_added += len(new_items)
