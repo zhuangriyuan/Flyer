@@ -340,3 +340,6 @@ if __name__ == "__main__":
     backup_name = f"tnt_raw_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     shutil.copy("tnt_raw.json", backup_name)
     print(f"[tnt] 已自动备份一份到 {backup_name}")
+
+    if not items:
+        sys.exit(1)

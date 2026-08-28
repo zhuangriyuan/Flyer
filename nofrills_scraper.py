@@ -24,6 +24,7 @@ import json
 import re
 import time
 import shutil
+import sys
 import uuid
 from datetime import datetime
 from typing import Optional
@@ -181,3 +182,6 @@ if __name__ == "__main__":
     backup_name = f"nofrills_raw_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     shutil.copy("nofrills_raw.json", backup_name)
     print(f"[nofrills] 已自动备份一份到 {backup_name}")
+
+    if not items:
+        sys.exit(1)
