@@ -39,6 +39,7 @@ query/operationName/variables 都是照着用户在浏览器 F12 Network 面板�
 """
 
 import json
+import os
 import re
 import shutil
 import sys
@@ -71,12 +72,14 @@ GRAPHQL_URL = "https://www.tntsupermarket.com/graphql"
 CATEGORY_ID = 3222
 PAGE_SIZE = 35
 
-# ⚠️⚠️⚠️ 本地测试的时候不带 Cookie 也能过（curl_cffi 的 TLS 指纹在家庭网络下
-# 够用）。实测在 GitHub Actions 上也不用 Cookie 就能过——光靠 curl_cffi
-# 模拟的 TLS 指纹就够了，Akamai 这边目前看起来主要卡的是这个，不是 Cookie。
-# 如果哪天情况变了（比如又开始被 403），把浏览器 F12 里复制的完整 Cookie
-# 粘贴到这个字符串里就行，见文件最上面的说明。
-COOKIE_HEADER = ""
+# ⚠️ 这是备份版本——tnt_scraper.py 主文件目前不用 Cookie 也能跑（本地和
+# GitHub Actions 上都验证过），这份留着以防哪天 Akamai 那边规则变严了，
+# 不带 Cookie 又开始被 403，到时候把这份换回去当主文件就行。
+#
+# Cookie 优先从环境变量 TNT_COOKIE 读（GitHub Actions 用 Secret 注入），
+# 本地手动测试图方便的话，可以把下面这个兜底值直接改成你复制的 Cookie，
+# 但提交到仓库前记得清空，别把 Cookie 提交上去。
+COOKIE_HEADER = os.environ.get("TNT_COOKIE", "")
 
 # 这两个是"配送地址/门店"相关的头，抓包时用户本地环境是这个值。理论上
 # 不同地区/门店库存价格可能有细微差异，不影响大方向，先照抄能跑就行；
