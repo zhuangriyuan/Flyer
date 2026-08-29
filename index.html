@@ -94,6 +94,7 @@
   }
   .search-box input{
     flex:1;
+    min-width:0;
     border:none;
     background:transparent;
     outline:none;
@@ -113,6 +114,7 @@
     font-weight:700;
     font-family:'Noto Sans SC',sans-serif;
     cursor:pointer;
+    flex-shrink:0;
     transition:transform .12s ease;
   }
   .search-box button:hover{transform:translateY(-2px);}
@@ -410,25 +412,76 @@
     border-radius:10px;
     max-width:560px;
     width:100%;
+    max-height:85vh;
+    overflow-y:auto;
     padding:24px;
     font-family:'Noto Sans SC',sans-serif;
-    text-align:center;
-  }
-  .shoplist-modal img{
-    max-width:100%;
-    border-radius:6px;
-    border:1px solid var(--card-line);
-    margin:12px 0;
+    text-align:left;
   }
   .shoplist-hint{
     font-size:13px;
     color:var(--ink-soft);
     margin:8px 0 16px;
   }
+  .shoplist-date{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-family:'Roboto Mono',monospace;
+    margin:0 0 16px;
+  }
+  .shoplist-rows{
+    display:flex;
+    flex-direction:column;
+  }
+  .shoplist-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 0;
+    border-bottom:1px solid var(--card-line);
+  }
+  .shoplist-row:last-child{border-bottom:none;}
+  .shoplist-row-img{
+    width:64px; height:64px;
+    border-radius:6px;
+    overflow:hidden;
+    background:var(--cream);
+    border:1px solid var(--card-line);
+    flex-shrink:0;
+  }
+  .shoplist-row-img img{width:100%; height:100%; object-fit:cover; display:block;}
+  .shoplist-row-info{flex:1; min-width:0;}
+  .shoplist-row-store{
+    display:inline-block;
+    font-size:10px; font-weight:700; color:#fff;
+    padding:2px 7px; border-radius:4px;
+    font-family:'Roboto Mono',monospace;
+  }
+  .shoplist-row-name{
+    margin:6px 0 0;
+    font-size:14px; font-weight:600; line-height:1.3;
+    overflow:hidden; text-overflow:ellipsis;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .shoplist-row-price{
+    font-size:19px; font-weight:900; color:var(--red);
+    flex-shrink:0;
+  }
+  .shoplist-total-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-top:2px solid var(--ink);
+    margin-top:4px;
+    padding-top:16px;
+    font-weight:700;
+  }
+  .shoplist-total-row span:last-child{font-size:24px; font-weight:900; color:var(--red);}
   .shoplist-modal-actions{
     display:flex;
     gap:10px;
     justify-content:center;
+    margin-top:20px;
   }
   .shoplist-modal-actions a, .shoplist-modal-actions button{
     font-family:'Noto Sans SC',sans-serif;
@@ -440,10 +493,19 @@
     cursor:pointer;
     border:none;
   }
-  .shoplist-download-btn{background:var(--gold); color:var(--bg);}
   .shoplist-close-btn{background:transparent; border:1px solid var(--card-line) !important; color:var(--ink);}
+  .shoplist-screenshot-btn{background:var(--gold); color:var(--bg);}
+  .shoplist-screenshot-btn:disabled{opacity:0.5; cursor:not-allowed;}
+
     width:100%; aspect-ratio:1/1;
     border-radius:5px; overflow:hidden;
+    background:var(--cream);
+  }
+  .compare-item-img{
+    width:100%;
+    aspect-ratio:1/1;
+    border-radius:5px;
+    overflow:hidden;
     background:var(--cream);
   }
   .compare-item-img img{width:100%; height:100%; object-fit:cover; display:block;}
@@ -632,7 +694,7 @@
     </div>
     <div class="compare-grid" id="compareGrid"></div>
     <div class="compare-modal-actions">
-      <button class="generate-list-btn" id="generateListBtn">生成购物清单图片</button>
+      <button class="generate-list-btn" id="generateListBtn">查看购物清单</button>
     </div>
   </div>
 </div>
@@ -643,12 +705,21 @@
       <h2>购物清单</h2>
       <button class="compare-modal-close" id="shoplistCloseBtnX">&times;</button>
     </div>
-    <img id="shoplistImg" alt="购物清单">
-    <p class="shoplist-hint">长按图片选择"保存图片"即可存到手机相册</p>
+    <p class="shoplist-date" id="shoplistDate"></p>
+    <div class="shoplist-rows" id="shoplistRows"></div>
+    <div class="shoplist-total-row">
+      <span id="shoplistCount"></span>
+      <span id="shoplistTotal"></span>
+    </div>
     <div class="shoplist-modal-actions">
-      <a class="shoplist-download-btn" id="shoplistDownloadBtn" download="购物清单.png">下载图片</a>
+      <button class="shoplist-screenshot-btn" id="shoplistScreenshotBtn">一键截图保存</button>
       <button class="shoplist-close-btn" id="shoplistCloseBtn">关闭</button>
     </div>
+    <p class="shoplist-hint" id="shoplistScreenshotHint">
+      点击后浏览器会弹窗让你选择"要共享这个窗口"，选中并确认即可自动截图下载——
+      这一步是浏览器强制要求的确认框，没法跳过。⚠️ 部署到 HTTPS 网址之后才能用，
+      本地直接打开文件（file://）无法使用这个功能。
+    </p>
   </div>
 </div>
 
@@ -952,153 +1023,139 @@ function closeCompareModal(){
   document.getElementById('compareModalOverlay').classList.remove('visible');
 }
 
-// ---------- 购物清单图片生成（Canvas 现场画，不依赖任何服务器） ----------
-function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines){
-  const chars = text.split('');
-  let line = '';
-  const lines = [];
-  for(const ch of chars){
-    const testLine = line + ch;
-    if(ctx.measureText(testLine).width > maxWidth && line !== ''){
-      lines.push(line);
-      line = ch;
-      if(lines.length >= maxLines) break;
-    } else {
-      line = testLine;
-    }
-  }
-  if(lines.length < maxLines && line) lines.push(line);
-  if(lines.length === maxLines){
-    // 还有内容没显示完，最后一行截断加省略号
-    let last = lines[maxLines-1];
-    while(ctx.measureText(last + '…').width > maxWidth && last.length > 1){
-      last = last.slice(0, -1);
-    }
-    const consumedLen = lines.slice(0, maxLines-1).reduce((n,l)=>n+l.length, 0) + last.length;
-    if(consumedLen < text.length) last += '…';
-    lines[maxLines-1] = last;
-  }
-  lines.forEach((l, i) => ctx.fillText(l, x, y + i*lineHeight));
-  return lines.length;
-}
+// ---------- 购物清单：用 html2canvas 截图隐藏模板生成图片 ----------
 
-function generateShoppingListImage(){
-  const items = [...shoppingListItems];
-  if(items.length === 0){
-    alert('先在上面的对比卡片里，点左上角的圆形勾选框，选几个要加入购物清单的商品');
-    return null;
-  }
+// ---------- 购物清单：真实网页窗口，不是生成的图片 ----------
+// 图片正常用 <img src> 显示（普通显示不受跨域限制，只有"导出成 Canvas/
+// 文件"才会撞墙），想保存的话用电脑自带的截图工具截这个窗口就行——
+// 彻底绕开跨域图片没法导出成文件这个问题，不用 html2canvas 这类库了。
 
-  const width = 560;
-  const rowHeight = 84;
-  const headerHeight = 84;
-  const footerHeight = 66;
-  const padding = 24;
-  const height = headerHeight + items.length * rowHeight + footerHeight;
-  const scale = 2;  // 画2倍尺寸再压缩显示，图片在手机上看起来更清晰
+function renderShoppingListRows(items){
+  const rowsWrap = document.getElementById('shoplistRows');
+  rowsWrap.innerHTML = '';
 
-  const canvas = document.createElement('canvas');
-  canvas.width = width * scale;
-  canvas.height = height * scale;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(scale, scale);
+  document.getElementById('shoplistDate').textContent =
+    new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
 
-  // 背景
-  ctx.fillStyle = '#FBF3E3';
-  ctx.fillRect(0, 0, width, height);
-
-  // 标题
-  ctx.fillStyle = '#1F2B24';
-  ctx.font = 'bold 24px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText('购物清单', padding, 40);
-
-  ctx.font = '12px monospace';
-  ctx.fillStyle = '#5B6B60';
-  const dateStr = new Date().toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
-  ctx.fillText(dateStr, padding, 60);
-
-  ctx.strokeStyle = '#E3D7BB';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(padding, headerHeight - 8);
-  ctx.lineTo(width - padding, headerHeight - 8);
-  ctx.stroke();
-
-  let y = headerHeight;
   let total = 0;
-  items.forEach((item, idx) => {
+  items.forEach(item => {
     const s = storeMeta(item.store);
-
-    // 左边店铺色条
-    ctx.fillStyle = s.color;
-    ctx.fillRect(padding, y + 12, 5, rowHeight - 26);
-
-    // 店铺名
-    ctx.font = 'bold 11px monospace';
-    ctx.fillStyle = s.color;
-    ctx.fillText(s.nameZh, padding + 14, y + 22);
-
-    // 商品名（最多两行，超出截断加省略号）
-    ctx.fillStyle = '#1F2B24';
-    ctx.font = '15px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-    const maxNameWidth = width - padding*2 - 14 - 90;
-    wrapCanvasText(ctx, item.nameEn, padding + 14, y + 42, maxNameWidth, 19, 2);
-
-    // 价格（右对齐）
-    ctx.fillStyle = '#E1483C';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`$${item.price.toFixed(2)}`, width - padding, y + 38);
-    ctx.textAlign = 'left';
-
     total += item.price;
-    y += rowHeight;
-
-    if(idx < items.length - 1){
-      ctx.strokeStyle = '#E3D7BB';
-      ctx.beginPath();
-      ctx.moveTo(padding, y);
-      ctx.lineTo(width - padding, y);
-      ctx.stroke();
-    }
+    const row = document.createElement('div');
+    row.className = 'shoplist-row';
+    row.innerHTML = `
+      <div class="shoplist-row-img">
+        ${item.image ? `<img src="${item.image}" alt="" onerror="this.parentElement.style.display='none'">` : ''}
+      </div>
+      <div class="shoplist-row-info">
+        <span class="shoplist-row-store" style="background:${s.color}">${s.nameZh}</span>
+        <p class="shoplist-row-name">${item.nameEn}</p>
+      </div>
+      <div class="shoplist-row-price">$${item.price.toFixed(2)}</div>
+    `;
+    rowsWrap.appendChild(row);
   });
 
-  // 合计
-  ctx.strokeStyle = '#1F2B24';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(padding, y + 14);
-  ctx.lineTo(width - padding, y + 14);
-  ctx.stroke();
-
-  ctx.fillStyle = '#1F2B24';
-  ctx.font = 'bold 15px "Noto Sans SC", "Microsoft YaHei", sans-serif';
-  ctx.fillText(`合计（${items.length} 件）`, padding, y + 42);
-
-  ctx.textAlign = 'right';
-  ctx.font = 'bold 24px sans-serif';
-  ctx.fillStyle = '#E1483C';
-  ctx.fillText(`$${total.toFixed(2)}`, width - padding, y + 46);
-  ctx.textAlign = 'left';
-
-  return canvas.toDataURL('image/png');
+  document.getElementById('shoplistCount').textContent = `合计（${items.length} 件）`;
+  document.getElementById('shoplistTotal').textContent = `$${total.toFixed(2)}`;
 }
 
 function openShoppingListModal(){
-  // 等网页字体真的加载完再画，不然 Canvas 画的时候字体可能还没到位，
-  // 用的是浏览器默认字体，中文倒是不受影响，但英文数字字重会不一样。
-  document.fonts.ready.then(() => {
-    const dataUrl = generateShoppingListImage();
-    if(!dataUrl) return;
-    document.getElementById('shoplistImg').src = dataUrl;
-    document.getElementById('shoplistDownloadBtn').href = dataUrl;
-    document.getElementById('shoplistModalOverlay').classList.add('visible');
-  });
+  // 防御性写法：购物清单理论上应该始终是"当前还在对比列表里的商品"的子集。
+  const items = [...shoppingListItems].filter(item => selectedItems.has(item));
+  if(items.length === 0){
+    alert('先在上面的对比卡片里，点左上角的圆形勾选框，选几个要加入购物清单的商品');
+    return;
+  }
+  renderShoppingListRows(items);
+  document.getElementById('shoplistModalOverlay').classList.add('visible');
 }
 function closeShoppingListModal(){
   document.getElementById('shoplistModalOverlay').classList.remove('visible');
 }
 
+// ---------- 一键截图：用屏幕捕获 API，不是画 Canvas ----------
+// 跟 html2canvas 那条路完全不同的技术——捕获的是"屏幕上已经渲染出来的
+// 像素"（跟人眼看到的一样），不是去读图片元素背后的原始数据，所以不会
+// 撞上跨域图片没法导出这堵墙。代价：
+//   1. 必须是 HTTPS（或 localhost）环境，file:// 本地打开用不了。
+//   2. 每次都会弹出浏览器自己的"选择要共享的窗口"确认框，这是浏览器
+//      强制要求的，没法跳过或者自动选。
+async function captureShoplistScreenshot(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia){
+    alert('当前环境不支持一键截图（可能不是 HTTPS 环境，或者浏览器不支持），'
+          + '改用系统自带的截图工具手动截这个窗口吧。');
+    return;
+  }
+
+  const btn = document.getElementById('shoplistScreenshotBtn');
+  const modal = document.querySelector('#shoplistModalOverlay .shoplist-modal');
+  let stream = null;
+
+  try {
+    btn.disabled = true;
+    btn.textContent = '请在弹窗里选择这个窗口…';
+
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { displaySurface: 'window' },
+      preferCurrentTab: true,       // Chrome 支持的话会建议默认选中当前标签页，减少选错的可能；不支持的浏览器会忽略这个选项
+      selfBrowserSurface: 'include',
+    });
+
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.muted = true;
+    await video.play();
+
+    await new Promise(resolve => {
+      if(video.readyState >= 2) resolve();
+      else video.onloadeddata = resolve;
+    });
+    await new Promise(resolve => setTimeout(resolve, 300));  // 等画面稳定下来
+
+    // 算购物清单弹窗在屏幕上的位置，从截到的整个窗口画面里裁出这一块。
+    // 视频捕获的分辨率跟网页的 CSS 像素坐标不一定是1:1（受屏幕缩放比例
+    // 影响），按视频实际尺寸跟浏览器可视区域尺寸的比例换算一下，裁切
+    // 位置才准。
+    const rect = modal.getBoundingClientRect();
+    const scaleX = video.videoWidth / window.innerWidth;
+    const scaleY = video.videoHeight / window.innerHeight;
+
+    const cropX = rect.left * scaleX;
+    const cropY = rect.top * scaleY;
+    const cropW = rect.width * scaleX;
+    const cropH = rect.height * scaleY;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = cropW;
+    canvas.height = cropH;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = '购物清单.png';
+    a.click();
+
+  } catch(e) {
+    if(e.name === 'NotAllowedError'){
+      console.log('[shoplist] 用户取消了截图授权，不算错误');
+    } else {
+      console.error('[shoplist] 截图失败：', e);
+      alert('截图失败，改用系统自带的截图工具手动截这个窗口吧。');
+    }
+  } finally {
+    if(stream) stream.getTracks().forEach(t => t.stop());
+    btn.disabled = false;
+    btn.textContent = '一键截图保存';
+  }
+}
+
+document.getElementById('shoplistScreenshotBtn').addEventListener('click', captureShoplistScreenshot);
 document.getElementById('compareViewBtn').addEventListener('click', openCompareModal);
 document.getElementById('compareModalCloseBtn').addEventListener('click', closeCompareModal);
 document.getElementById('compareModalOverlay').addEventListener('click', (e) => {
@@ -1106,6 +1163,7 @@ document.getElementById('compareModalOverlay').addEventListener('click', (e) => 
 });
 document.getElementById('compareClearBtn').addEventListener('click', () => {
   selectedItems.clear();
+  shoppingListItems.clear();  // 之前这里漏了，导致"清空"之后购物清单里的旧勾选还残留着
   updateCompareBar();
   render();
 });
